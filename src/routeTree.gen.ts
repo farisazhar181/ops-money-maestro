@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
+import { Route as AuthenticatedPayablesRouteImport } from './routes/_authenticated/payables'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedReceivablesRouteImport } from './routes/_authenticated/receivables'
 import { Route as AuthenticatedJobsJobIdRouteImport } from './routes/_authenticated/jobs.$jobId'
 
@@ -41,6 +43,16 @@ const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPayablesRoute = AuthenticatedPayablesRouteImport.update({
+  id: '/payables',
+  path: '/payables',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReceivablesRoute =
   AuthenticatedReceivablesRouteImport.update({
     id: '/receivables',
@@ -58,6 +70,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
+  '/payables': typeof AuthenticatedPayablesRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/receivables': typeof AuthenticatedReceivablesRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
 }
@@ -66,6 +80,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
+  '/payables': typeof AuthenticatedPayablesRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/receivables': typeof AuthenticatedReceivablesRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
 }
@@ -76,15 +92,32 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRouteWithChildren
+  '/_authenticated/payables': typeof AuthenticatedPayablesRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/receivables': typeof AuthenticatedReceivablesRoute
   '/_authenticated/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/dashboard' | '/jobs' | '/receivables' | '/jobs/$jobId'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/jobs'
+    | '/payables'
+    | '/payments'
+    | '/receivables'
+    | '/jobs/$jobId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/jobs' | '/receivables' | '/jobs/$jobId'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/jobs'
+    | '/payables'
+    | '/payments'
+    | '/receivables'
+    | '/jobs/$jobId'
   id:
     | '__root__'
     | '/'
@@ -92,6 +125,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/jobs'
+    | '/_authenticated/payables'
+    | '/_authenticated/payments'
     | '/_authenticated/receivables'
     | '/_authenticated/jobs/$jobId'
   fileRoutesById: FileRoutesById
@@ -139,6 +174,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJobsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payables': {
+      id: '/_authenticated/payables'
+      path: '/payables'
+      fullPath: '/payables'
+      preLoaderRoute: typeof AuthenticatedPayablesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/receivables': {
       id: '/_authenticated/receivables'
       path: '/receivables'
@@ -170,12 +219,16 @@ const AuthenticatedJobsRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRouteWithChildren
+  AuthenticatedPayablesRoute: typeof AuthenticatedPayablesRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedReceivablesRoute: typeof AuthenticatedReceivablesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRouteWithChildren,
+  AuthenticatedPayablesRoute: AuthenticatedPayablesRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedReceivablesRoute: AuthenticatedReceivablesRoute,
 }
 
