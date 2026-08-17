@@ -1,0 +1,266 @@
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useRoles } from "@/hooks/use-auth";
+
+export const Route = createFileRoute("/_authenticated/master-data")({
+  head: () => ({
+    meta: [
+      { title: "Master Data | Loka Logistics ERP" },
+      {
+        name: "description",
+        content: "Manage customers and subcontractor vendors used across job sheets, invoices and bills.",
+      },
+      { property: "og:title", content: "Master Data | Loka Logistics ERP" },
+      { property: "og:description", content: "Customer and vendor master records." },
+    ],
+  }),
+  component: MasterData,
+});
+
+function MasterData() {
+  const qc = useQueryClient();
+  const { canEditJobs } = useRoles();
+  const [custOpen, setCustOpen] = useState(false);
+  const [vendOpen, setVendOpen] = useState(false);
+  const [cust, setCust] = useState({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
+  const [vend, setVend] = useState({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
+
+  const customers = useQuery({
+    queryKey: ["customers-full"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("customers").select("*").order("company_name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const vendors = useQuery({
+    queryKey: ["vendors-full"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("subcontractors_vendors").select("*").order("vendor_name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const addCustomer = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("customers").insert(cust);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Customer added");
+      setCustOpen(false);
+      setCust({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
+      qc.invalidateQueries({ queryKey: ["customers-full"] });
+      qc.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const addVendor = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("subcontractors_vendors").insert(vend);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Vendor added");
+      setVendOpen(false);
+      setVend({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
+      qc.invalidateQueries({ queryKey: ["vendors-full"] });
+      qc.invalidateQueries({ queryKey: ["vendors"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-semibold">Master Data</h1>
+        <p className="text-sm text-muted-foreground">Customers and subcontractor vendors.</p>
+      </div>
+
+      <Tabs defaultValue="customers">
+        <TabsList>
+          <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="vendors">Vendors</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="customers" className="pt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Customers ({customers.data?.length ?? 0})</CardTitle>
+              {canEditJobs && (
+                <Dialog open={custOpen} onOpenChange={setCustOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="mr-2 h-4 w-4" /> Add customer
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>New customer</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      {(
+                        [
+                          ["Company name", "company_name"],
+                          ["Contact name", "contact_name"],
+                          ["Phone", "phone"],
+                          ["Email", "email"],
+                          ["Address", "address"],
+                        ] as const
+                      ).map(([label, key]) => (
+                        <div key={key} className="space-y-2">
+                          <Label>{label}</Label>
+                          <Input
+                            value={cust[key]}
+                            onChange={(e) => setCust({ ...cust, [key]: e.target.value })}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        onClick={() => addCustomer.mutate()}
+                        disabled={!cust.company_name || addCustomer.isPending}
+                      >
+                        Save customer
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Address</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(customers.data ?? []).map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.company_name}</TableCell>
+                      <TableCell>{c.contact_name}</TableCell>
+                      <TableCell>{c.phone}</TableCell>
+                      <TableCell>{c.email}</TableCell>
+                      <TableCell className="text-muted-foreground">{c.address}</TableCell>
+                    </TableRow>
+                  ))}
+                  {(customers.data ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                        No customers yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="vendors" className="pt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Vendors ({vendors.data?.length ?? 0})</CardTitle>
+              {canEditJobs && (
+                <Dialog open={vendOpen} onOpenChange={setVendOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="mr-2 h-4 w-4" /> Add vendor
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>New vendor</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      {(
+                        [
+                          ["Vendor name", "vendor_name"],
+                          ["Service type", "service_type"],
+                          ["Contact person", "contact_person"],
+                          ["Phone", "phone"],
+                        ] as const
+                      ).map(([label, key]) => (
+                        <div key={key} className="space-y-2">
+                          <Label>{label}</Label>
+                          <Input
+                            value={vend[key]}
+                            onChange={(e) => setVend({ ...vend, [key]: e.target.value })}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        onClick={() => addVendor.mutate()}
+                        disabled={!vend.vendor_name || addVendor.isPending}
+                      >
+                        Save vendor
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Vendor</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Contact person</TableHead>
+                    <TableHead>Phone</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(vendors.data ?? []).map((v) => (
+                    <TableRow key={v.id}>
+                      <TableCell className="font-medium">{v.vendor_name}</TableCell>
+                      <TableCell>{v.service_type}</TableCell>
+                      <TableCell>{v.contact_person}</TableCell>
+                      <TableCell>{v.phone}</TableCell>
+                    </TableRow>
+                  ))}
+                  {(vendors.data ?? []).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                        No vendors yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
