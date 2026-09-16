@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       accounts_payable: {
         Row: {
+          attachment_path: string | null
           balance_remaining: number | null
           created_at: string
           due_date: string | null
@@ -30,6 +31,7 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          attachment_path?: string | null
           balance_remaining?: number | null
           created_at?: string
           due_date?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          attachment_path?: string | null
           balance_remaining?: number | null
           created_at?: string
           due_date?: string | null
@@ -77,6 +80,7 @@ export type Database = {
       accounts_receivable: {
         Row: {
           amount: number
+          attachment_path: string | null
           created_at: string
           customer_id: string | null
           due_date: string
@@ -91,6 +95,7 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          attachment_path?: string | null
           created_at?: string
           customer_id?: string | null
           due_date?: string
@@ -105,6 +110,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          attachment_path?: string | null
           created_at?: string
           customer_id?: string | null
           due_date?: string
@@ -130,6 +136,117 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          description: string
+          entity_id: string
+          entity_type: string
+          id: string
+          job_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          job_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          job_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ap_payments: {
+        Row: {
+          amount: number
+          ap_id: string
+          created_at: string
+          created_by: string
+          id: string
+          payment_date: string
+        }
+        Insert: {
+          amount: number
+          ap_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          payment_date?: string
+        }
+        Update: {
+          amount?: number
+          ap_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          payment_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ap_payments_ap_id_fkey"
+            columns: ["ap_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_payable"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ar_payments: {
+        Row: {
+          amount: number
+          ar_id: string
+          created_at: string
+          created_by: string
+          id: string
+          payment_date: string
+        }
+        Insert: {
+          amount: number
+          ar_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          payment_date?: string
+        }
+        Update: {
+          amount?: number
+          ar_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          payment_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ar_payments_ar_id_fkey"
+            columns: ["ar_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
           },
         ]
@@ -164,9 +281,49 @@ export type Database = {
         }
         Relationships: []
       }
+      job_financials: {
+        Row: {
+          actual_buying: number
+          actual_selling: number
+          estimated_buying: number
+          estimated_selling: number
+          job_id: string
+          margin: number | null
+          pct_margin: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_buying?: number
+          actual_selling?: number
+          estimated_buying?: number
+          estimated_selling?: number
+          job_id: string
+          margin?: number | null
+          pct_margin?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_buying?: number
+          actual_selling?: number
+          estimated_buying?: number
+          estimated_selling?: number
+          job_id?: string
+          margin?: number | null
+          pct_margin?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_financials_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
-          buying_price_est: number
           created_at: string
           created_by: string | null
           customer_id: string | null
@@ -176,14 +333,12 @@ export type Database = {
           order_date: string
           origin: string | null
           quantity: string | null
-          selling_price: number
           service_type: string | null
           status: Database["public"]["Enums"]["job_status"]
           unit_type: string | null
           volume_weight: string | null
         }
         Insert: {
-          buying_price_est?: number
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -193,14 +348,12 @@ export type Database = {
           order_date?: string
           origin?: string | null
           quantity?: string | null
-          selling_price?: number
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           unit_type?: string | null
           volume_weight?: string | null
         }
         Update: {
-          buying_price_est?: number
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -210,7 +363,6 @@ export type Database = {
           order_date?: string
           origin?: string | null
           quantity?: string | null
-          selling_price?: number
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           unit_type?: string | null
@@ -268,18 +420,21 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          status: Database["public"]["Enums"]["account_status"]
         }
         Insert: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          status?: Database["public"]["Enums"]["account_status"]
         }
         Update: {
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["account_status"]
         }
         Relationships: []
       }
@@ -336,11 +491,110 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      close_job_financials: {
+        Args: {
+          _actual_buying: number
+          _actual_selling: number
+          _job_id: string
+          _status: Database["public"]["Enums"]["job_status"]
+        }
+        Returns: undefined
+      }
+      deactivate_user: { Args: { _user_id: string }; Returns: undefined }
+      record_ap_payment: {
+        Args: { _amount: number; _ap_id: string; _payment_date: string }
+        Returns: {
+          attachment_path: string | null
+          balance_remaining: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_amount: number
+          item_cost_description: string | null
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          status: Database["public"]["Enums"]["ap_status"]
+          vendor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_payable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_ar_payment: {
+        Args: { _amount: number; _ar_id: string; _payment_date: string }
+        Returns: {
+          amount: number
+          attachment_path: string | null
+          created_at: string
+          customer_id: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_no: string
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          remaining_amount: number | null
+          status: Database["public"]["Enums"]["ar_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_receivable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_job_operations: {
+        Args: {
+          _customer_id: string
+          _destination: string
+          _job_id: string
+          _order_date: string
+          _origin: string
+          _quantity: string
+          _service_type: string
+          _unit_type: string
+          _volume_weight: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          destination: string | null
+          id: string
+          job_sheet_no: string
+          order_date: string
+          origin: string | null
+          quantity: string | null
+          service_type: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          unit_type: string | null
+          volume_weight: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
+      account_status: "pending" | "active" | "deactivated"
       ap_status: "Unpaid" | "Partially Paid" | "Paid"
-      app_role: "admin" | "finance" | "operations"
+      app_role: "owner" | "finance" | "operations"
       ar_status: "Draft" | "Issued" | "Partially Paid" | "Paid" | "Overdue"
       job_status: "Draft" | "In Progress" | "Completed" | "Cancelled"
       payment_method: "Bank Transfer" | "Cash" | "Giro"
@@ -473,8 +727,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["pending", "active", "deactivated"],
       ap_status: ["Unpaid", "Partially Paid", "Paid"],
-      app_role: ["admin", "finance", "operations"],
+      app_role: ["owner", "finance", "operations"],
       ar_status: ["Draft", "Issued", "Partially Paid", "Paid", "Overdue"],
       job_status: ["Draft", "In Progress", "Completed", "Cancelled"],
       payment_method: ["Bank Transfer", "Cash", "Giro"],
