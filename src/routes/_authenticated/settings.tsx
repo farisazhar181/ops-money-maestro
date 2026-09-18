@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate } from "@/lib/format";
-import { useRoles, type AppRole } from "@/hooks/use-auth";
+import { useAuthUser, useRoles, type AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({

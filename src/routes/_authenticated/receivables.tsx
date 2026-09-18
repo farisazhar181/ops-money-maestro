@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
@@ -40,7 +39,7 @@ function ReceivablesPage() {
   const qc = useQueryClient();
   const { canEditFinance } = useRoles();
   const [payFor, setPayFor] = useState<{ id: string; invoice_no: string; balance: number } | null>(null);
-  const [pay, setPay] = useState({ amount: "", method: "Bank Transfer", date: today(), notes: "" });
+  const [pay, setPay] = useState({ amount: "", date: today() });
 
   const { data: rows } = useQuery({
     queryKey: ["ar"],
@@ -57,36 +56,21 @@ function ReceivablesPage() {
   const record = useMutation({
     mutationFn: async () => {
       if (!payFor) return;
-      const amount = num(pay.amount);
-      const { data: current, error: readErr } = await supabase
-        .from("accounts_receivable")
-        .select("paid_amount")
-        .eq("id", payFor.id)
-        .single();
-      if (readErr) throw readErr;
-      const { error } = await supabase
-        .from("accounts_receivable")
-        .update({ paid_amount: num(current.paid_amount) + amount })
-        .eq("id", payFor.id);
-      if (error) throw error;
-      const { data: userRes } = await supabase.auth.getUser();
-      const { error: txErr } = await supabase.from("payment_transactions").insert({
-        reference_type: "AR_RECEIPT",
-        reference_id: payFor.id,
-        transaction_date: pay.date,
-        amount,
-        payment_method: pay.method as "Bank Transfer" | "Cash" | "Giro",
-        notes: pay.notes || `Receipt for ${payFor.invoice_no}`,
-        created_by: userRes.user?.id ?? null,
+      const { error } = await supabase.rpc("record_ar_payment", {
+        _ar_id: payFor.id,
+        _payment_date: pay.date,
+        _amount: num(pay.amount),
       });
-      if (txErr) throw txErr;
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Receipt recorded");
       setPayFor(null);
-      setPay({ amount: "", method: "Bank Transfer", date: today(), notes: "" });
+      setPay({ amount: "", date: today() });
       qc.invalidateQueries({ queryKey: ["ar"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["reports"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -159,7 +143,7 @@ function ReceivablesPage() {
                           variant="outline"
                           onClick={() => setPayFor({ id: r.id, invoice_no: r.invoice_no, balance: bal })}
                         >
-                          <Banknote className="mr-1 h-4 w-4" /> Receipt
+                          <Banknote className="mr-1 h-4 w-4" /> Record payment
                         </Button>
                       )}
                     </TableCell>
@@ -188,33 +172,14 @@ function ReceivablesPage() {
               <Label>Amount (balance {idr(payFor?.balance ?? 0)})</Label>
               <Input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Date</Label>
-                <Input type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Method</Label>
-                <Select value={pay.method} onValueChange={(v) => setPay({ ...pay, method: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="Cash">Cash</SelectItem>
-                    <SelectItem value="Giro">Giro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
-              <Input value={pay.notes} onChange={(e) => setPay({ ...pay, notes: e.target.value })} />
+              <Label>Date</Label>
+              <Input type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
             </div>
           </div>
           <DialogFooter>
             <Button onClick={() => record.mutate()} disabled={!pay.amount || record.isPending}>
-              Save receipt
+              Record payment
             </Button>
           </DialogFooter>
         </DialogContent>
