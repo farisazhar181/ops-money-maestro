@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "finance" | "operations";
+export type AppRole = "owner" | "finance" | "operations";
+export type AccountStatus = "pending" | "active" | "deactivated";
 
 export function useAuthUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,25 +27,39 @@ export function useAuthUser() {
 export function useRoles() {
   const { user } = useAuthUser();
   const query = useQuery({
-    queryKey: ["roles", user?.id],
+    queryKey: ["access", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user!.id);
-      if (error) throw error;
-      return (data ?? []).map((r) => r.role as AppRole);
+      if (!user) return { roles: [] as AppRole[], status: "pending" as AccountStatus };
+      const [rolesResult, profileResult] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+        supabase.from("profiles").select("status").eq("id", user.id).maybeSingle(),
+      ]);
+      if (rolesResult.error) throw rolesResult.error;
+      if (profileResult.error) throw profileResult.error;
+      return {
+        roles: (rolesResult.data ?? []).map((r) => r.role as AppRole),
+        status: (profileResult.data?.status ?? "pending") as AccountStatus,
+      };
     },
   });
 
-  const roles = query.data ?? [];
+  const roles = query.data?.roles ?? [];
+  const status = query.data?.status ?? "pending";
   return {
     roles,
+    status,
     loading: query.isLoading,
-    isAdmin: roles.includes("admin"),
+    isActive: status === "active" && roles.length > 0,
+    isPending: status === "pending" || (status === "active" && roles.length === 0),
+    isDeactivated: status === "deactivated",
+    isOwner: roles.includes("owner"),
     isFinance: roles.includes("finance"),
     isOperations: roles.includes("operations"),
-    canSeeExecutive: roles.includes("admin") || roles.includes("finance"),
-    canEditJobs: roles.includes("admin") || roles.includes("operations"),
-    canEditFinance: roles.includes("admin") || roles.includes("finance"),
-    primaryRole: (roles.includes("admin") ? "admin" : (roles[0] ?? "operations")) as AppRole,
+    canSeeExecutive: roles.includes("owner") || roles.includes("finance"),
+    canEditJobs: roles.includes("owner") || roles.includes("operations"),
+    canEditFinance: roles.includes("owner") || roles.includes("finance"),
+    canManageUsers: roles.includes("owner") || roles.includes("finance"),
+    primaryRole: roles.includes("owner") ? "owner" : roles[0],
   };
 }
