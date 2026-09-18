@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,8 @@ const empty = {
 
 function JobsPage() {
   const qc = useQueryClient();
-  const { canEditJobs } = useRoles();
+  const navigate = useNavigate();
+  const { canEditJobs, canEditFinance } = useRoles();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [filter, setFilter] = useState<string>("all");
@@ -63,7 +64,7 @@ function JobsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("jobs")
-        .select("*, customers(company_name)")
+        .select("*, customers(company_name), job_financials(estimated_selling, estimated_buying)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -82,7 +83,7 @@ function JobsPage() {
   const create = useMutation({
     mutationFn: async () => {
       const { data: userRes } = await supabase.auth.getUser();
-      const { error } = await supabase.from("jobs").insert({
+      const { data: created, error } = await supabase.from("jobs").insert({
         job_sheet_no: form.job_sheet_no,
         customer_id: form.customer_id || null,
         order_date: form.order_date,
@@ -92,12 +93,18 @@ function JobsPage() {
         volume_weight: form.volume_weight,
         origin: form.origin,
         destination: form.destination,
-        selling_price: num(form.selling_price),
-        buying_price_est: num(form.buying_price_est),
         status: "Draft",
         created_by: userRes.user?.id ?? null,
-      });
+      }).select("id").single();
       if (error) throw error;
+      if (canEditFinance && created) {
+        const { error: financeError } = await supabase.from("job_financials").insert({
+          job_id: created.id,
+          estimated_selling: num(form.selling_price),
+          estimated_buying: num(form.buying_price_est),
+        });
+        if (financeError) throw financeError;
+      }
     },
     onSuccess: () => {
       toast.success("Job sheet created");
@@ -165,8 +172,8 @@ function JobsPage() {
                   <Field label="Volume / weight" value={form.volume_weight} onChange={(v) => setForm({ ...form, volume_weight: v })} placeholder="6000 Kg" />
                   <Field label="Origin" value={form.origin} onChange={(v) => setForm({ ...form, origin: v })} />
                   <Field label="Destination" value={form.destination} onChange={(v) => setForm({ ...form, destination: v })} />
-                  <Field label="Selling price (IDR)" type="number" value={form.selling_price} onChange={(v) => setForm({ ...form, selling_price: v })} />
-                  <Field label="Estimated buying price (IDR)" type="number" value={form.buying_price_est} onChange={(v) => setForm({ ...form, buying_price_est: v })} />
+                  {canEditFinance && <Field label="Estimated selling (IDR)" type="number" value={form.selling_price} onChange={(v) => setForm({ ...form, selling_price: v })} />}
+                  {canEditFinance && <Field label="Estimated buying (IDR)" type="number" value={form.buying_price_est} onChange={(v) => setForm({ ...form, buying_price_est: v })} />}
                 </div>
                 <DialogFooter>
                   <Button onClick={() => create.mutate()} disabled={!form.job_sheet_no || create.isPending}>
@@ -199,25 +206,27 @@ function JobsPage() {
             </TableHeader>
             <TableBody>
               {rows.map((j) => (
-                <TableRow key={j.id}>
+                 <TableRow
+                   key={j.id}
+                   className="cursor-pointer"
+                   tabIndex={0}
+                   onClick={() => navigate({ to: "/jobs/$jobId", params: { jobId: j.id } })}
+                   onKeyDown={(event) => {
+                     if (event.key === "Enter") navigate({ to: "/jobs/$jobId", params: { jobId: j.id } });
+                   }}
+                 >
                   <TableCell className="font-medium">{j.job_sheet_no}</TableCell>
                   <TableCell>{j.customers?.company_name ?? "-"}</TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {j.origin || "?"} → {j.destination || "?"}
                   </TableCell>
                   <TableCell>{fmtDate(j.order_date)}</TableCell>
-                  <TableCell className="text-right">{idr(j.selling_price)}</TableCell>
-                  <TableCell className="text-right">{idr(j.buying_price_est)}</TableCell>
+                  <TableCell className="text-right">{j.job_financials ? idr(j.job_financials.estimated_selling) : "—"}</TableCell>
+                  <TableCell className="text-right">{j.job_financials ? idr(j.job_financials.estimated_buying) : "—"}</TableCell>
                   <TableCell>
                     <StatusBadge status={j.status} />
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link to="/jobs/$jobId" params={{ jobId: j.id }}>
-                        Open <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">Open</TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (

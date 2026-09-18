@@ -5,6 +5,7 @@ import {
   ReceiptText,
   Wallet,
   Banknote,
+  ChartNoAxesCombined,
   Database,
   Settings,
   Ship,
@@ -31,7 +32,7 @@ const nav = [
   { title: "Cash Flow", url: "/payments", icon: Banknote },
 ];
 
-const admin = [
+const administration = [
   { title: "Master Data", url: "/master-data", icon: Database },
   { title: "User Settings", url: "/settings", icon: Settings },
 ];
@@ -40,9 +41,15 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const path = useRouterState({ select: (r) => r.location.pathname });
-  const { canSeeExecutive } = useRoles();
+  const { canSeeExecutive, canManageUsers, canEditJobs } = useRoles();
 
-  const items = nav.filter((i) => !i.exec || canSeeExecutive);
+  const items = [
+    ...nav.filter((i) => !i.exec || canSeeExecutive),
+    ...(canSeeExecutive ? [{ title: "Reports", url: "/reports", icon: ChartNoAxesCombined }] : []),
+  ];
+  const administrationItems = administration.filter((item) =>
+    item.url === "/settings" ? canManageUsers : canEditJobs,
+  );
   const isActive = (url: string) => path === url || path.startsWith(url + "/");
 
   return (
@@ -64,7 +71,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
+        {administrationItems.length > 0 && <SidebarGroup>
           <SidebarGroupLabel>Operations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -86,7 +93,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {admin.map((item) => (
+              {administrationItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <Link to={item.url} className="flex items-center gap-2">
@@ -98,7 +105,7 @@ export function AppSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>}
       </SidebarContent>
     </Sidebar>
   );

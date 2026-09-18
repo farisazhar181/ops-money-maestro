@@ -79,7 +79,7 @@ function Dashboard() {
     queryKey: ["dashboard"],
     queryFn: async () => {
       const [jobs, ar, ap, tx] = await Promise.all([
-        supabase.from("jobs").select("id, selling_price, buying_price_est, status"),
+        supabase.from("jobs").select("id, status, job_financials(estimated_selling)"),
         supabase
           .from("accounts_receivable")
           .select("id, invoice_no, amount, paid_amount, remaining_amount, due_date, status, customers(company_name)")
@@ -111,7 +111,7 @@ function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Executive financial metrics are available to Admin and Finance roles only. Use Job Sheets to
+          Executive financial metrics are available to Owner and Finance roles only. Use Job Sheets to
           manage your shipments.
         </CardContent>
       </Card>
@@ -151,7 +151,7 @@ function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Kpi label="Total Sales Revenue (Accrual)" value={idr(revenue)} icon={TrendingUp} sub={`Pipeline value ${idr(jobs.reduce((s, j) => s + num(j.selling_price), 0))}`} />
+        <Kpi label="Total Sales Revenue (Accrual)" value={idr(revenue)} icon={TrendingUp} sub={`Pipeline value ${idr(jobs.reduce((s, j) => s + num(j.job_financials?.estimated_selling), 0))}`} />
         <Kpi
           label="Accounts Receivable"
           value={idr(arOutstanding)}

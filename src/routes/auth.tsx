@@ -70,7 +70,7 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Account created. You can sign in now.");
+    toast.success("Account created. Sign in to view your access status.");
   };
 
   return (
@@ -174,8 +174,7 @@ function AuthPage() {
                     Create account
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    New accounts start with the Operations role. An Admin can upgrade them in User
-                    Settings.
+                    New accounts start pending. An Owner or Finance user must assign access.
                   </p>
                 </form>
               </TabsContent>
