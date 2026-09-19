@@ -1,9 +1,9 @@
 ## Pending implementation
-- [ ] Resolve database function security warnings
-- [ ] Gate pending and deactivated accounts
-- [ ] Complete role assignment and deactivation UI
-- [ ] Wire atomic AP and AR payments
-- [ ] Complete job financial creation, editing, detail, audit, and attachments
-- [ ] Add reports and CSV exports
-- [ ] Refresh generated database types
+- [x] Resolve database function security warnings
+- [x] Gate pending and deactivated accounts
+- [x] Complete role assignment and deactivation UI
+- [x] Wire atomic AP and AR payments
+- [x] Complete job financial creation, editing, detail, audit, and attachments
+- [x] Add reports and CSV exports
+- [x] Refresh generated database types
 - [ ] Verify builds, roles, and workflows
