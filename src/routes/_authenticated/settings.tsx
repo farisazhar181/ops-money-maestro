@@ -129,7 +129,7 @@ function SettingsPage() {
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={u.role ?? undefined}
+                      value={u.role ?? ""}
                       onValueChange={(v) => setRole.mutate({ userId: u.id, role: v as AppRole })}
                       disabled={u.id === user?.id || u.status === "deactivated"}
                     >

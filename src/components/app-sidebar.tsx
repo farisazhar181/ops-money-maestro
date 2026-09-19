@@ -71,7 +71,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {administrationItems.length > 0 && <SidebarGroup>
+        <SidebarGroup>
           <SidebarGroupLabel>Operations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -89,7 +89,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        {administrationItems.length > 0 && <SidebarGroup>
           <SidebarGroupLabel>Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
