@@ -6,4 +6,4 @@
 - [x] Complete job financial creation, editing, detail, audit, and attachments
 - [x] Add reports and CSV exports
 - [x] Refresh generated database types
-- [ ] Verify builds, roles, and workflows
+- [x] Verify builds, roles, and workflows
