@@ -1,0 +1,1 @@
+UPDATE public.profiles SET status = 'deactivated'::public.account_status WHERE id = '2b7feb06-9282-4918-88f7-67286f0c0723';

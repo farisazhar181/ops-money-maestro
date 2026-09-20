@@ -1,0 +1,2 @@
+DELETE FROM public.user_roles WHERE user_id = '2b7feb06-9282-4918-88f7-67286f0c0723' AND role = 'operations'::public.app_role;
+INSERT INTO public.user_roles (user_id, role) VALUES ('2b7feb06-9282-4918-88f7-67286f0c0723', 'finance'::public.app_role) ON CONFLICT (user_id, role) DO NOTHING;
