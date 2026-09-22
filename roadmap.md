@@ -7,3 +7,4 @@
 - [x] Add reports and CSV exports
 - [x] Refresh generated database types
 - [x] Verify builds, roles, and workflows
+- [ ] Make Overhead and Investor pages read-only for Owner and manageable by Finance

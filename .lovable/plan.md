@@ -30,7 +30,7 @@ Extend the existing ERP without rebuilding working workflows. Corrections will r
 - Treat actual values as unset until close. Dashboard, Statistics, and Monthly P&L use actuals for Closed jobs and estimates only for Pipeline/Active jobs.
 - Update filters, dialogs, badges, summaries, audit descriptions, and tests to the new status vocabulary.
 
-### 3. Overhead and investor entries
+### 3. Overhead and investor entries (Owner read-only; Finance manages)
 - Add an **Overhead Costs** table and page with month/date, Fixed or Variable type, amount, note, audit fields, edit, and void.
 - Add an **Investor Transactions** table and page with Loan In or Repayment type, amount, date, note, audit fields, edit, and void.
 - Restrict both areas to active Owner/Finance users through database policies.
