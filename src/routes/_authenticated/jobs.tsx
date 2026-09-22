@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -54,6 +54,7 @@ const empty = {
 function JobsPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { canEditJobs, canEditFinance } = useRoles();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
@@ -116,6 +117,8 @@ function JobsPage() {
   });
 
   const rows = (jobs ?? []).filter((j) => filter === "all" || j.status === filter);
+
+  if (pathname !== "/jobs" && pathname !== "/jobs/") return <Outlet />;
 
   return (
     <div className="space-y-6">
