@@ -22,13 +22,18 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_amount: number
+          is_void: boolean
           item_cost_description: string | null
           job_id: string | null
           paid_amount: number
           payment_terms_days: number
           payment_type: Database["public"]["Enums"]["payment_type"]
           status: Database["public"]["Enums"]["ap_status"]
+          updated_at: string
           vendor_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           attachment_path?: string | null
@@ -37,13 +42,18 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_amount?: number
+          is_void?: boolean
           item_cost_description?: string | null
           job_id?: string | null
           paid_amount?: number
           payment_terms_days?: number
           payment_type?: Database["public"]["Enums"]["payment_type"]
           status?: Database["public"]["Enums"]["ap_status"]
+          updated_at?: string
           vendor_id?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           attachment_path?: string | null
@@ -52,13 +62,18 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_amount?: number
+          is_void?: boolean
           item_cost_description?: string | null
           job_id?: string | null
           paid_amount?: number
           payment_terms_days?: number
           payment_type?: Database["public"]["Enums"]["payment_type"]
           status?: Database["public"]["Enums"]["ap_status"]
+          updated_at?: string
           vendor_id?: string | null
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -75,6 +90,13 @@ export type Database = {
             referencedRelation: "subcontractors_vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "accounts_payable_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       accounts_receivable: {
@@ -87,11 +109,16 @@ export type Database = {
           id: string
           invoice_date: string
           invoice_no: string
+          is_void: boolean
           job_id: string | null
           paid_amount: number
           payment_terms_days: number
           remaining_amount: number | null
           status: Database["public"]["Enums"]["ar_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount?: number
@@ -102,11 +129,16 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_no: string
+          is_void?: boolean
           job_id?: string | null
           paid_amount?: number
           payment_terms_days?: number
           remaining_amount?: number | null
           status?: Database["public"]["Enums"]["ar_status"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
@@ -117,11 +149,16 @@ export type Database = {
           id?: string
           invoice_date?: string
           invoice_no?: string
+          is_void?: boolean
           job_id?: string | null
           paid_amount?: number
           payment_terms_days?: number
           remaining_amount?: number | null
           status?: Database["public"]["Enums"]["ar_status"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -138,6 +175,13 @@ export type Database = {
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "accounts_receivable_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       activity_log: {
@@ -149,6 +193,8 @@ export type Database = {
           entity_type: string
           id: string
           job_id: string | null
+          new_values: Json | null
+          old_values: Json | null
           user_id: string | null
         }
         Insert: {
@@ -159,6 +205,8 @@ export type Database = {
           entity_type: string
           id?: string
           job_id?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
           user_id?: string | null
         }
         Update: {
@@ -169,6 +217,8 @@ export type Database = {
           entity_type?: string
           id?: string
           job_id?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
           user_id?: string | null
         }
         Relationships: [
@@ -188,7 +238,13 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          is_void: boolean
           payment_date: string
+          payment_transaction_id: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount: number
@@ -196,7 +252,13 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          is_void?: boolean
           payment_date?: string
+          payment_transaction_id?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
@@ -204,7 +266,13 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          is_void?: boolean
           payment_date?: string
+          payment_transaction_id?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -212,6 +280,20 @@ export type Database = {
             columns: ["ap_id"]
             isOneToOne: false
             referencedRelation: "accounts_payable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ap_payments_payment_transaction_id_fkey"
+            columns: ["payment_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ap_payments_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -223,7 +305,13 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          is_void: boolean
           payment_date: string
+          payment_transaction_id: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount: number
@@ -231,7 +319,13 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          is_void?: boolean
           payment_date?: string
+          payment_transaction_id?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
@@ -239,7 +333,13 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          is_void?: boolean
           payment_date?: string
+          payment_transaction_id?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -247,6 +347,20 @@ export type Database = {
             columns: ["ar_id"]
             isOneToOne: false
             referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ar_payments_payment_transaction_id_fkey"
+            columns: ["payment_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ar_payments_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -280,6 +394,66 @@ export type Database = {
           phone?: string | null
         }
         Relationships: []
+      }
+      investor_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          id?: string
+          is_void?: boolean
+          note: string
+          transaction_date?: string
+          transaction_type: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_void?: boolean
+          note?: string
+          transaction_date?: string
+          transaction_type?: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investor_transactions_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_financials: {
         Row: {
@@ -329,6 +503,7 @@ export type Database = {
           customer_id: string | null
           destination: string | null
           id: string
+          is_void: boolean
           job_sheet_no: string
           order_date: string
           origin: string | null
@@ -336,6 +511,10 @@ export type Database = {
           service_type: string | null
           status: Database["public"]["Enums"]["job_status"]
           unit_type: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
           volume_weight: string | null
         }
         Insert: {
@@ -344,6 +523,7 @@ export type Database = {
           customer_id?: string | null
           destination?: string | null
           id?: string
+          is_void?: boolean
           job_sheet_no: string
           order_date?: string
           origin?: string | null
@@ -351,6 +531,10 @@ export type Database = {
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           unit_type?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
           volume_weight?: string | null
         }
         Update: {
@@ -359,6 +543,7 @@ export type Database = {
           customer_id?: string | null
           destination?: string | null
           id?: string
+          is_void?: boolean
           job_sheet_no?: string
           order_date?: string
           origin?: string | null
@@ -366,6 +551,10 @@ export type Database = {
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           unit_type?: string | null
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
           volume_weight?: string | null
         }
         Relationships: [
@@ -376,6 +565,73 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "jobs_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overhead_costs: {
+        Row: {
+          amount: number
+          cost_date: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          cost_date?: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at?: string
+          created_by: string
+          id?: string
+          is_void?: boolean
+          note: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          cost_date?: string
+          cost_type?: Database["public"]["Enums"]["overhead_type"]
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_void?: boolean
+          note?: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overhead_costs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overhead_costs_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payment_transactions: {
@@ -384,35 +640,58 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          is_void: boolean
           notes: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           reference_id: string | null
           reference_type: Database["public"]["Enums"]["reference_type"]
           transaction_date: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount?: number
           created_at?: string
           created_by?: string | null
           id?: string
+          is_void?: boolean
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           reference_id?: string | null
           reference_type: Database["public"]["Enums"]["reference_type"]
           transaction_date?: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
           created_by?: string | null
           id?: string
+          is_void?: boolean
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           reference_id?: string | null
           reference_type?: Database["public"]["Enums"]["reference_type"]
           transaction_date?: string
+          updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -508,6 +787,168 @@ export type Database = {
         Returns: undefined
       }
       deactivate_user: { Args: { _user_id: string }; Returns: undefined }
+      edit_ap: {
+        Args: {
+          _amount: number
+          _description: string
+          _due_date: string
+          _id: string
+          _terms: number
+          _vendor_id: string
+        }
+        Returns: {
+          attachment_path: string | null
+          balance_remaining: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_amount: number
+          is_void: boolean
+          item_cost_description: string | null
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          status: Database["public"]["Enums"]["ap_status"]
+          updated_at: string
+          vendor_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_payable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      edit_ar: {
+        Args: {
+          _amount: number
+          _customer_id: string
+          _due_date: string
+          _id: string
+          _invoice_date: string
+          _invoice_no: string
+          _terms: number
+        }
+        Returns: {
+          amount: number
+          attachment_path: string | null
+          created_at: string
+          customer_id: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_no: string
+          is_void: boolean
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          remaining_amount: number | null
+          status: Database["public"]["Enums"]["ar_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_receivable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      edit_cash_transaction: {
+        Args: {
+          _amount: number
+          _date: string
+          _id: string
+          _method: Database["public"]["Enums"]["payment_method"]
+          _notes: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_void: boolean
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          reference_id: string | null
+          reference_type: Database["public"]["Enums"]["reference_type"]
+          transaction_date: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payment_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      edit_investor_transaction: {
+        Args: {
+          _amount: number
+          _date: string
+          _id: string
+          _note: string
+          _type: Database["public"]["Enums"]["investor_transaction_type"]
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "investor_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      edit_overhead: {
+        Args: {
+          _amount: number
+          _date: string
+          _id: string
+          _note: string
+          _type: Database["public"]["Enums"]["overhead_type"]
+        }
+        Returns: {
+          amount: number
+          cost_date: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "overhead_costs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_ap_payment: {
         Args: { _amount: number; _ap_id: string; _payment_date: string }
         Returns: {
@@ -517,13 +958,18 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_amount: number
+          is_void: boolean
           item_cost_description: string | null
           job_id: string | null
           paid_amount: number
           payment_terms_days: number
           payment_type: Database["public"]["Enums"]["payment_type"]
           status: Database["public"]["Enums"]["ap_status"]
+          updated_at: string
           vendor_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         SetofOptions: {
           from: "*"
@@ -543,11 +989,16 @@ export type Database = {
           id: string
           invoice_date: string
           invoice_no: string
+          is_void: boolean
           job_id: string | null
           paid_amount: number
           payment_terms_days: number
           remaining_amount: number | null
           status: Database["public"]["Enums"]["ar_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         SetofOptions: {
           from: "*"
@@ -574,6 +1025,7 @@ export type Database = {
           customer_id: string | null
           destination: string | null
           id: string
+          is_void: boolean
           job_sheet_no: string
           order_date: string
           origin: string | null
@@ -581,11 +1033,173 @@ export type Database = {
           service_type: string | null
           status: Database["public"]["Enums"]["job_status"]
           unit_type: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
           volume_weight: string | null
         }
         SetofOptions: {
           from: "*"
           to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_ap: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          attachment_path: string | null
+          balance_remaining: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_amount: number
+          is_void: boolean
+          item_cost_description: string | null
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          status: Database["public"]["Enums"]["ap_status"]
+          updated_at: string
+          vendor_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_payable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_ar: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          amount: number
+          attachment_path: string | null
+          created_at: string
+          customer_id: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_no: string
+          is_void: boolean
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          remaining_amount: number | null
+          status: Database["public"]["Enums"]["ar_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_receivable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_cash_transaction: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_void: boolean
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          reference_id: string | null
+          reference_type: Database["public"]["Enums"]["reference_type"]
+          transaction_date: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payment_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_investor_transaction: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "investor_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_job: {
+        Args: { _job_id: string; _reason: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          destination: string | null
+          id: string
+          is_void: boolean
+          job_sheet_no: string
+          order_date: string
+          origin: string | null
+          quantity: string | null
+          service_type: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          unit_type: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+          volume_weight: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      void_overhead: {
+        Args: { _id: string; _reason: string }
+        Returns: {
+          amount: number
+          cost_date: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "overhead_costs"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -596,7 +1210,9 @@ export type Database = {
       ap_status: "Unpaid" | "Partially Paid" | "Paid"
       app_role: "owner" | "finance" | "operations"
       ar_status: "Draft" | "Issued" | "Partially Paid" | "Paid" | "Overdue"
-      job_status: "Draft" | "In Progress" | "Completed" | "Cancelled"
+      investor_transaction_type: "Loan In" | "Repayment"
+      job_status: "Pipeline" | "Active" | "Closed"
+      overhead_type: "Fixed" | "Variable"
       payment_method: "Bank Transfer" | "Cash" | "Giro"
       payment_type: "Term" | "Cash"
       reference_type: "AR_RECEIPT" | "AP_PAYMENT" | "OPERATIONAL_EXPENSE"
@@ -731,7 +1347,9 @@ export const Constants = {
       ap_status: ["Unpaid", "Partially Paid", "Paid"],
       app_role: ["owner", "finance", "operations"],
       ar_status: ["Draft", "Issued", "Partially Paid", "Paid", "Overdue"],
-      job_status: ["Draft", "In Progress", "Completed", "Cancelled"],
+      investor_transaction_type: ["Loan In", "Repayment"],
+      job_status: ["Pipeline", "Active", "Closed"],
+      overhead_type: ["Fixed", "Variable"],
       payment_method: ["Bank Transfer", "Cash", "Giro"],
       payment_type: ["Term", "Cash"],
       reference_type: ["AR_RECEIPT", "AP_PAYMENT", "OPERATIONAL_EXPENSE"],
