@@ -11,6 +11,7 @@ import {
   Ship,
   Coins,
   Landmark,
+  LineChart as LineChartIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -52,6 +53,7 @@ export function AppSidebar() {
           { title: "Overhead Costs", url: "/overhead", icon: Coins },
           { title: "Investor Transactions", url: "/investors", icon: Landmark },
           { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+          { title: "Statistics", url: "/statistics", icon: LineChartIcon },
         ]
       : []),
   ];
