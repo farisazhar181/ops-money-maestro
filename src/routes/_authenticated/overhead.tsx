@@ -178,7 +178,6 @@ function OverheadPage() {
           <h1 className="font-display text-2xl font-semibold">Overhead Costs</h1>
           <p className="text-sm text-muted-foreground">
             Subtracted from Net Profit in the month of the cost date.{" "}
-            
           </p>
         </div>
         {canManageOverhead && (
@@ -224,7 +223,9 @@ function OverheadPage() {
                     </TableCell>
                     <TableCell>
                       {r.note}
-                      {r.is_void && <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />}
+                      {r.is_void && (
+                        <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />
+                      )}
                     </TableCell>
                     <TableCell>
                       {r.is_void ? (
@@ -256,7 +257,12 @@ function OverheadPage() {
                             variant="ghost"
                             onClick={() => {
                               setEditId(r.id);
-                              setForm({ cost_date: r.cost_date, cost_type: r.cost_type, amount: String(r.amount), note: r.note });
+                              setForm({
+                                cost_date: r.cost_date,
+                                cost_type: r.cost_type,
+                                amount: String(r.amount),
+                                note: r.note,
+                              });
                               setAddOpen(true);
                             }}
                           >

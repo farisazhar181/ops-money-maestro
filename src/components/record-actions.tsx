@@ -4,7 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { fmtDate } from "@/lib/format";
 
 /** Names of users the current role is allowed to read (for "voided by"). */
@@ -102,12 +109,17 @@ export function VoidDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {description ?? "The entry stays visible, marked Voided, and is excluded from all totals."}
+            {description ??
+              "The entry stays visible, marked Voided, and is excluded from all totals."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
           <Label>Reason (required)</Label>
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. duplicate entry" />
+          <Input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="e.g. duplicate entry"
+          />
         </div>
         {error && <BlockedMessage message={error} />}
         <DialogFooter>
@@ -138,7 +150,13 @@ export function FormField({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Input type={type} min={min} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input
+        type={type}
+        min={min}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }

@@ -8,9 +8,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { FormField, VoidDialog, VoidedNote } from "@/components/record-actions";
 import { fmtDate, idr, numOrNull, today } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
@@ -19,9 +38,16 @@ export const Route = createFileRoute("/_authenticated/investors")({
   head: () => ({
     meta: [
       { title: "Investor Transactions | Loka Logistics ERP" },
-      { name: "description", content: "Investor loans in and repayments, tracked as financing separate from operating profit." },
+      {
+        name: "description",
+        content:
+          "Investor loans in and repayments, tracked as financing separate from operating profit.",
+      },
       { property: "og:title", content: "Investor Transactions | Loka Logistics ERP" },
-      { property: "og:description", content: "Financing movements kept apart from Loka Logistics operating figures." },
+      {
+        property: "og:description",
+        content: "Financing movements kept apart from Loka Logistics operating figures.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -45,7 +71,10 @@ function InvestorsPage() {
     enabled: canSeeExecutive,
     queryFn: async () => {
       const [rows, summary] = await Promise.all([
-        supabase.from("investor_transactions").select("*").order("transaction_date", { ascending: false }),
+        supabase
+          .from("investor_transactions")
+          .select("*")
+          .order("transaction_date", { ascending: false }),
         supabase.rpc("report_summary"),
       ]);
       if (rows.error) throw rows.error;
@@ -55,12 +84,18 @@ function InvestorsPage() {
   });
 
   const refresh = () => {
-    for (const k of ["investors", "payments", "dashboard", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+    for (const k of ["investors", "payments", "dashboard", "reports"])
+      qc.invalidateQueries({ queryKey: [k] });
   };
 
   const save = useMutation({
     mutationFn: async () => {
-      const args = { _date: form.date, _type: form.type, _amount: numOrNull(form.amount) ?? 0, _note: form.note };
+      const args = {
+        _date: form.date,
+        _type: form.type,
+        _amount: numOrNull(form.amount) ?? 0,
+        _note: form.note,
+      };
       const { error } = editId
         ? await supabase.rpc("edit_investor_transaction", { _id: editId, ...args })
         : await supabase.rpc("create_investor_transaction", args);
@@ -118,13 +153,17 @@ function InvestorsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Loans in</CardDescription>
-            <CardTitle className="font-display text-xl text-success">{idr(s?.financing_in)}</CardTitle>
+            <CardTitle className="font-display text-xl text-success">
+              {idr(s?.financing_in)}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Repayments</CardDescription>
-            <CardTitle className="font-display text-xl text-destructive">{idr(s?.financing_out)}</CardTitle>
+            <CardTitle className="font-display text-xl text-destructive">
+              {idr(s?.financing_out)}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -138,7 +177,9 @@ function InvestorsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Entries ({list.length})</CardTitle>
-          <CardDescription>Voided entries stay visible and are excluded from totals.</CardDescription>
+          <CardDescription>
+            Voided entries stay visible and are excluded from totals.
+          </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -165,9 +206,15 @@ function InvestorsPage() {
                   </TableCell>
                   <TableCell>
                     {r.note}
-                    {r.is_void && <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />}
+                    {r.is_void && (
+                      <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />
+                    )}
                   </TableCell>
-                  <TableCell className={`text-right font-medium ${r.is_void ? "line-through" : ""}`}>{idr(r.amount)}</TableCell>
+                  <TableCell
+                    className={`text-right font-medium ${r.is_void ? "line-through" : ""}`}
+                  >
+                    {idr(r.amount)}
+                  </TableCell>
                   <TableCell className="whitespace-nowrap text-right">
                     {canManage && !r.is_void && (
                       <>
@@ -177,13 +224,23 @@ function InvestorsPage() {
                           title="Edit"
                           onClick={() => {
                             setEditId(r.id);
-                            setForm({ date: r.transaction_date, type: r.transaction_type, amount: String(r.amount), note: r.note });
+                            setForm({
+                              date: r.transaction_date,
+                              type: r.transaction_type,
+                              amount: String(r.amount),
+                              note: r.note,
+                            });
                             setOpen(true);
                           }}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(r.id)}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Void"
+                          onClick={() => setVoidId(r.id)}
+                        >
                           <Ban className="h-4 w-4" />
                         </Button>
                       </>
@@ -206,12 +263,17 @@ function InvestorsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editId ? "Edit investor transaction" : "Add investor transaction"}</DialogTitle>
+            <DialogTitle>
+              {editId ? "Edit investor transaction" : "Add investor transaction"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as TxType })}>
+              <Select
+                value={form.type}
+                onValueChange={(v) => setForm({ ...form, type: v as TxType })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -221,9 +283,23 @@ function InvestorsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <FormField label="Amount (IDR)" type="number" value={form.amount} onChange={(v) => setForm({ ...form, amount: v })} />
-            <FormField label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
-            <FormField label="Note" value={form.note} onChange={(v) => setForm({ ...form, note: v })} />
+            <FormField
+              label="Amount (IDR)"
+              type="number"
+              value={form.amount}
+              onChange={(v) => setForm({ ...form, amount: v })}
+            />
+            <FormField
+              label="Date"
+              type="date"
+              value={form.date}
+              onChange={(v) => setForm({ ...form, date: v })}
+            />
+            <FormField
+              label="Note"
+              value={form.note}
+              onChange={(v) => setForm({ ...form, note: v })}
+            />
           </div>
           <DialogFooter>
             <Button onClick={() => save.mutate()} disabled={save.isPending}>
@@ -238,7 +314,10 @@ function InvestorsPage() {
         onOpenChange={(o) => !o && setVoidId(null)}
         title="Void investor transaction"
         onConfirm={async (reason) => {
-          const { error } = await supabase.rpc("void_investor_transaction", { _id: voidId ?? "", _reason: reason });
+          const { error } = await supabase.rpc("void_investor_transaction", {
+            _id: voidId ?? "",
+            _reason: reason,
+          });
           if (error) throw error;
           toast.success("Transaction voided");
           refresh();

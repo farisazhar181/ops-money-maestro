@@ -5,8 +5,20 @@ import { ArrowDownRight, ArrowUpRight, Ban, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FormField, VoidDialog, VoidedNote } from "@/components/record-actions";
 import { numOrNull } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,11 +60,18 @@ export const Route = createFileRoute("/_authenticated/payments")({
 function PaymentsPage() {
   const { canSeeExecutive, canEditFinance } = useRoles();
   const qc = useQueryClient();
-  const [editTx, setEditTx] = useState<{ id: string; date: string; amount: string; method: string; notes: string } | null>(null);
+  const [editTx, setEditTx] = useState<{
+    id: string;
+    date: string;
+    amount: string;
+    method: string;
+    notes: string;
+  } | null>(null);
   const [voidId, setVoidId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const refresh = () => {
-    for (const k of ["payments", "ap", "ar", "overhead", "dashboard", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+    for (const k of ["payments", "ap", "ar", "overhead", "dashboard", "reports"])
+      qc.invalidateQueries({ queryKey: [k] });
   };
   const saveEdit = async () => {
     if (!editTx) return;
@@ -175,7 +194,9 @@ function PaymentsPage() {
                     <TableCell>{t.payment_method}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {t.notes}
-                      {t.is_void && <VoidedNote at={t.voided_at} by={t.voided_by} reason={t.void_reason} />}
+                      {t.is_void && (
+                        <VoidedNote at={t.voided_at} by={t.voided_by} reason={t.void_reason} />
+                      )}
                     </TableCell>
                     <TableCell
                       className={`text-right font-medium ${t.is_void ? "line-through" : inbound ? "text-success" : "text-destructive"}`}
@@ -204,9 +225,16 @@ function PaymentsPage() {
                               <Pencil className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <span className="mr-2 text-xs text-muted-foreground">Edit on Overhead page</span>
+                            <span className="mr-2 text-xs text-muted-foreground">
+                              Edit on Overhead page
+                            </span>
                           )}
-                          <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(t.id)}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Void"
+                            onClick={() => setVoidId(t.id)}
+                          >
                             <Ban className="h-4 w-4" />
                           </Button>
                         </>
@@ -234,11 +262,24 @@ function PaymentsPage() {
           </DialogHeader>
           {editTx && (
             <div className="space-y-4">
-              <FormField label="Date" type="date" value={editTx.date} onChange={(v) => setEditTx({ ...editTx, date: v })} />
-              <FormField label="Amount (IDR)" type="number" value={editTx.amount} onChange={(v) => setEditTx({ ...editTx, amount: v })} />
+              <FormField
+                label="Date"
+                type="date"
+                value={editTx.date}
+                onChange={(v) => setEditTx({ ...editTx, date: v })}
+              />
+              <FormField
+                label="Amount (IDR)"
+                type="number"
+                value={editTx.amount}
+                onChange={(v) => setEditTx({ ...editTx, amount: v })}
+              />
               <div className="space-y-2">
                 <Label>Method</Label>
-                <Select value={editTx.method} onValueChange={(v) => setEditTx({ ...editTx, method: v })}>
+                <Select
+                  value={editTx.method}
+                  onValueChange={(v) => setEditTx({ ...editTx, method: v })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -251,7 +292,11 @@ function PaymentsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <FormField label="Notes" value={editTx.notes} onChange={(v) => setEditTx({ ...editTx, notes: v })} />
+              <FormField
+                label="Notes"
+                value={editTx.notes}
+                onChange={(v) => setEditTx({ ...editTx, notes: v })}
+              />
             </div>
           )}
           <DialogFooter>
@@ -268,7 +313,10 @@ function PaymentsPage() {
         title="Void transaction"
         description="The linked bill, invoice or overhead balance is restored in the same step. The entry stays visible, marked Voided."
         onConfirm={async (reason) => {
-          const { error } = await supabase.rpc("void_cash_transaction", { _id: voidId ?? "", _reason: reason });
+          const { error } = await supabase.rpc("void_cash_transaction", {
+            _id: voidId ?? "",
+            _reason: reason,
+          });
           if (error) throw error;
           toast.success("Transaction voided");
           refresh();

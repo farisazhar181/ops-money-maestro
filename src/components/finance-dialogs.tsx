@@ -4,8 +4,20 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FormField } from "@/components/record-actions";
 import { addDays, idr, numOrNull } from "@/lib/format";
 
@@ -28,13 +40,30 @@ export type ArRow = {
   payment_terms_days: number;
 };
 
-export function EditApDialog({ row, onClose, onSaved }: { row: ApRow | null; onClose: () => void; onSaved: () => void }) {
-  const [f, setF] = useState({ vendor_id: "", description: "", amount: "", bill_date: "", terms: "" });
+export function EditApDialog({
+  row,
+  onClose,
+  onSaved,
+}: {
+  row: ApRow | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [f, setF] = useState({
+    vendor_id: "",
+    description: "",
+    amount: "",
+    bill_date: "",
+    terms: "",
+  });
   const [pending, setPending] = useState(false);
   const vendors = useQuery({
     queryKey: ["vendors"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("subcontractors_vendors").select("id, vendor_name").order("vendor_name");
+      const { data, error } = await supabase
+        .from("subcontractors_vendors")
+        .select("id, vendor_name")
+        .order("vendor_name");
       if (error) throw error;
       return data;
     },
@@ -93,15 +122,29 @@ export function EditApDialog({ row, onClose, onSaved }: { row: ApRow | null; onC
               </SelectContent>
             </Select>
           </div>
-          <FormField label="Description" value={f.description} onChange={(v) => setF({ ...f, description: v })} />
+          <FormField
+            label="Description"
+            value={f.description}
+            onChange={(v) => setF({ ...f, description: v })}
+          />
           <FormField
             label={`Amount (IDR) — not below paid ${idr(row?.paid_amount)}`}
             type="number"
             value={f.amount}
             onChange={(v) => setF({ ...f, amount: v })}
           />
-          <FormField label="Bill date" type="date" value={f.bill_date} onChange={(v) => setF({ ...f, bill_date: v })} />
-          <FormField label="TOP (days)" type="number" value={f.terms} onChange={(v) => setF({ ...f, terms: v })} />
+          <FormField
+            label="Bill date"
+            type="date"
+            value={f.bill_date}
+            onChange={(v) => setF({ ...f, bill_date: v })}
+          />
+          <FormField
+            label="TOP (days)"
+            type="number"
+            value={f.terms}
+            onChange={(v) => setF({ ...f, terms: v })}
+          />
         </div>
         <DialogFooter>
           <Button onClick={save} disabled={pending}>
@@ -113,13 +156,30 @@ export function EditApDialog({ row, onClose, onSaved }: { row: ApRow | null; onC
   );
 }
 
-export function EditArDialog({ row, onClose, onSaved }: { row: ArRow | null; onClose: () => void; onSaved: () => void }) {
-  const [f, setF] = useState({ invoice_no: "", customer_id: "", invoice_date: "", amount: "", terms: "" });
+export function EditArDialog({
+  row,
+  onClose,
+  onSaved,
+}: {
+  row: ArRow | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [f, setF] = useState({
+    invoice_no: "",
+    customer_id: "",
+    invoice_date: "",
+    amount: "",
+    terms: "",
+  });
   const [pending, setPending] = useState(false);
   const customers = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("id, company_name").order("company_name");
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, company_name")
+        .order("company_name");
       if (error) throw error;
       return data;
     },
@@ -163,7 +223,11 @@ export function EditArDialog({ row, onClose, onSaved }: { row: ArRow | null; onC
           <DialogTitle>Edit invoice</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <FormField label="Invoice no." value={f.invoice_no} onChange={(v) => setF({ ...f, invoice_no: v })} />
+          <FormField
+            label="Invoice no."
+            value={f.invoice_no}
+            onChange={(v) => setF({ ...f, invoice_no: v })}
+          />
           <div className="space-y-2">
             <Label>Customer</Label>
             <Select value={f.customer_id} onValueChange={(v) => setF({ ...f, customer_id: v })}>
@@ -179,14 +243,24 @@ export function EditArDialog({ row, onClose, onSaved }: { row: ArRow | null; onC
               </SelectContent>
             </Select>
           </div>
-          <FormField label="Invoice date" type="date" value={f.invoice_date} onChange={(v) => setF({ ...f, invoice_date: v })} />
+          <FormField
+            label="Invoice date"
+            type="date"
+            value={f.invoice_date}
+            onChange={(v) => setF({ ...f, invoice_date: v })}
+          />
           <FormField
             label={`Amount (IDR) — not below received ${idr(row?.paid_amount)}`}
             type="number"
             value={f.amount}
             onChange={(v) => setF({ ...f, amount: v })}
           />
-          <FormField label="TOP (days)" type="number" value={f.terms} onChange={(v) => setF({ ...f, terms: v })} />
+          <FormField
+            label="TOP (days)"
+            type="number"
+            value={f.terms}
+            onChange={(v) => setF({ ...f, terms: v })}
+          />
         </div>
         <DialogFooter>
           <Button onClick={save} disabled={pending}>
