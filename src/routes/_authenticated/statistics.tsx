@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { idr, num, today } from "@/lib/format";
+import { rangeFor } from "@/lib/statistics";
 
 export const Route = createFileRoute("/_authenticated/statistics")({
   head: () => ({
@@ -25,12 +26,6 @@ export const Route = createFileRoute("/_authenticated/statistics")({
 });
 
 const BUCKETS = ["Current", "1–30 days", "31–60 days", "61–90 days", "90+ days"];
-
-export function rangeFor(months: number, todayIso: string) {
-  const [y, m] = todayIso.split("-").map(Number);
-  const start = new Date(Date.UTC(y!, m! - 1 - (months - 1), 1));
-  return { from: start.toISOString().slice(0, 10), to: todayIso };
-}
 
 const compact = (v: number) => new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 const monthLabel = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "2-digit", timeZone: "UTC" });
