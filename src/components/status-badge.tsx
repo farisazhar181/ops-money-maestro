@@ -19,7 +19,10 @@ const map: Record<string, string> = {
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   return (
-    <Badge variant="outline" className={cn("border font-medium", map[status] ?? "bg-muted", className)}>
+    <Badge
+      variant="outline"
+      className={cn("border font-medium", map[status] ?? "bg-muted", className)}
+    >
       {status}
     </Badge>
   );

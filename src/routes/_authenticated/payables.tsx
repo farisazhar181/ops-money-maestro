@@ -8,8 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
 import { paymentDateError } from "@/lib/finance-rules";
@@ -26,7 +39,10 @@ export const Route = createFileRoute("/_authenticated/payables")({
         content: "Vendor bill schedule with weekly aging, payment terms and settlement recording.",
       },
       { property: "og:title", content: "Accounts Payable | Loka Logistics ERP" },
-      { property: "og:description", content: "Track vendor obligations and payments for Loka Logistics." },
+      {
+        property: "og:description",
+        content: "Track vendor obligations and payments for Loka Logistics.",
+      },
     ],
   }),
   component: PayablesPage,
@@ -35,12 +51,18 @@ export const Route = createFileRoute("/_authenticated/payables")({
 function PayablesPage() {
   const qc = useQueryClient();
   const { canEditFinance } = useRoles();
-  const [payFor, setPayFor] = useState<{ id: string; label: string; balance: number; minDate: string } | null>(null);
+  const [payFor, setPayFor] = useState<{
+    id: string;
+    label: string;
+    balance: number;
+    minDate: string;
+  } | null>(null);
   const [pay, setPay] = useState({ amount: "", date: today() });
   const [editRow, setEditRow] = useState<ApRow | null>(null);
   const [voidId, setVoidId] = useState<string | null>(null);
   const refresh = () => {
-    for (const k of ["ap", "dashboard", "payments", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+    for (const k of ["ap", "dashboard", "payments", "reports"])
+      qc.invalidateQueries({ queryKey: [k] });
   };
 
   const { data: rows } = useQuery({
@@ -91,15 +113,17 @@ function PayablesPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold">Accounts Payable</h1>
         <p className="text-sm text-muted-foreground">
-          {list.length} vendor bills &middot; {idr(outstanding)} outstanding &middot; {dueThisWeek.length} due
-          within 7 days
+          {list.length} vendor bills &middot; {idr(outstanding)} outstanding &middot;{" "}
+          {dueThisWeek.length} due within 7 days
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Schedule of AP</CardTitle>
-          <CardDescription>Cost lines are logged against a job sheet from the job detail page.</CardDescription>
+          <CardDescription>
+            Cost lines are logged against a job sheet from the job detail page.
+          </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -122,16 +146,30 @@ function PayablesPage() {
                 const bal = num(r.balance_remaining);
                 const late = isOverdue(r.due_date, bal);
                 return (
-                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined}>
-                    <TableCell className="font-medium">{r.subcontractors_vendors?.vendor_name ?? "-"}{r.is_void && <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />}</TableCell>
-                    <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
+                  <TableRow
+                    key={r.id}
+                    className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined}
+                  >
+                    <TableCell className="font-medium">
+                      {r.subcontractors_vendors?.vendor_name ?? "-"}
+                      {r.is_void && (
+                        <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {r.jobs?.job_sheet_no ?? "-"}
+                    </TableCell>
                     <TableCell>{r.item_cost_description}</TableCell>
                     <TableCell>{r.payment_terms_days}d</TableCell>
                     <TableCell>
                       {fmtDate(r.due_date)}
                       {bal > 0 && (
-                        <span className={`ml-2 text-xs ${late ? "text-destructive" : "text-muted-foreground"}`}>
-                          {late ? `${Math.abs(daysUntil(r.due_date))}d late` : `in ${daysUntil(r.due_date)}d`}
+                        <span
+                          className={`ml-2 text-xs ${late ? "text-destructive" : "text-muted-foreground"}`}
+                        >
+                          {late
+                            ? `${Math.abs(daysUntil(r.due_date))}d late`
+                            : `in ${daysUntil(r.due_date)}d`}
                         </span>
                       )}
                     </TableCell>
@@ -144,8 +182,22 @@ function PayablesPage() {
                     <TableCell className="whitespace-nowrap text-right">
                       {canEditFinance && !r.is_void && (
                         <>
-                          <Button size="icon" variant="ghost" title="Edit" onClick={() => setEditRow(r)}><Pencil className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(r.id)}><Ban className="h-4 w-4" /></Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Edit"
+                            onClick={() => setEditRow(r)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Void"
+                            onClick={() => setVoidId(r.id)}
+                          >
+                            <Ban className="h-4 w-4" />
+                          </Button>
                         </>
                       )}
                       {canEditFinance && bal > 0 && !r.is_void && (
@@ -200,11 +252,20 @@ function PayablesPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Amount (balance {idr(payFor?.balance ?? 0)})</Label>
-              <Input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
+              <Input
+                type="number"
+                value={pay.amount}
+                onChange={(e) => setPay({ ...pay, amount: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Date (not before {fmtDate(payFor?.minDate)})</Label>
-              <Input type="date" min={payFor?.minDate} value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
+              <Input
+                type="date"
+                min={payFor?.minDate}
+                value={pay.date}
+                onChange={(e) => setPay({ ...pay, date: e.target.value })}
+              />
             </div>
           </div>
           <DialogFooter>

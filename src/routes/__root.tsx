@@ -79,10 +79,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Loka Logistics ERP | Financial Operations" },
-      { name: "description", content: "Role-based logistics and financial operations ERP for PT. Loka Logistics Solution." },
+      {
+        name: "description",
+        content:
+          "Role-based logistics and financial operations ERP for PT. Loka Logistics Solution.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Loka Logistics ERP | Financial Operations" },
-      { property: "og:description", content: "Job sheets, receivables, payables and cash flow in one workspace." },
+      {
+        property: "og:description",
+        content: "Job sheets, receivables, payables and cash flow in one workspace.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },

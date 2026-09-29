@@ -15,7 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/status-badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { idr, num, pct, fmtDate } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
 
@@ -103,8 +110,8 @@ function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Executive financial metrics are available to Owner and Finance roles only. Use Job Sheets to
-          manage your shipments.
+          Executive financial metrics are available to Owner and Finance roles only. Use Job Sheets
+          to manage your shipments.
         </CardContent>
       </Card>
     );
@@ -127,12 +134,18 @@ function Dashboard() {
       <div>
         <h1 className="font-display text-2xl font-semibold">Executive Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          {num(m?.jobs_total)} job sheets &middot; {num(m?.jobs_closed)} closed · figures exclude voided records
+          {num(m?.jobs_total)} job sheets &middot; {num(m?.jobs_closed)} closed · figures exclude
+          voided records
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Kpi label="Total Sales Revenue (Accrual)" value={idr(revenue)} icon={TrendingUp} sub="Non-void issued invoices" />
+        <Kpi
+          label="Total Sales Revenue (Accrual)"
+          value={idr(revenue)}
+          icon={TrendingUp}
+          sub="Non-void issued invoices"
+        />
         <Kpi
           label="Accounts Receivable"
           value={idr(m?.ar_outstanding)}
@@ -258,14 +271,10 @@ function Dashboard() {
               <TableBody>
                 {upcomingAp.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">
-                      {r.party ?? "-"}
-                    </TableCell>
+                    <TableCell className="font-medium">{r.party ?? "-"}</TableCell>
                     <TableCell>{fmtDate(r.due_date)}</TableCell>
                     <TableCell>
-                      <StatusBadge
-                        status={num(r.days_overdue) > 0 ? "Overdue" : r.bucket}
-                      />
+                      <StatusBadge status={num(r.days_overdue) > 0 ? "Overdue" : r.bucket} />
                     </TableCell>
                     <TableCell className="text-right">{idr(r.balance)}</TableCell>
                   </TableRow>

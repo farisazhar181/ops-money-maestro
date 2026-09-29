@@ -27,7 +27,12 @@ function AuthenticatedLayout() {
     navigate({ to: "/auth" });
   };
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Checking access…</div>;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        Checking access…
+      </div>
+    );
 
   if (!isActive) {
     return (
@@ -47,7 +52,11 @@ function AuthenticatedLayout() {
           <Button className="mt-6" variant="outline" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" /> Sign out
           </Button>
-          {isPending && <p className="mt-3 text-xs text-muted-foreground">You can safely return after your role is assigned.</p>}
+          {isPending && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              You can safely return after your role is assigned.
+            </p>
+          )}
         </div>
       </div>
     );
@@ -61,7 +70,11 @@ function AuthenticatedLayout() {
           <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b bg-card/80 px-4 backdrop-blur">
             <SidebarTrigger />
             <div className="flex items-center gap-3">
-              {primaryRole && <Badge variant="secondary" className="capitalize">{primaryRole}</Badge>}
+              {primaryRole && (
+                <Badge variant="secondary" className="capitalize">
+                  {primaryRole}
+                </Badge>
+              )}
               <span className="hidden text-sm text-muted-foreground sm:inline">{user?.email}</span>
               <Button variant="ghost" size="sm" onClick={signOut}>
                 <LogOut className="mr-2 h-4 w-4" />

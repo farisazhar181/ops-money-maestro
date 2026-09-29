@@ -17,7 +17,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/master-data")({
@@ -26,7 +33,8 @@ export const Route = createFileRoute("/_authenticated/master-data")({
       { title: "Master Data | Loka Logistics ERP" },
       {
         name: "description",
-        content: "Manage customers and subcontractor vendors used across job sheets, invoices and bills.",
+        content:
+          "Manage customers and subcontractor vendors used across job sheets, invoices and bills.",
       },
       { property: "og:title", content: "Master Data | Loka Logistics ERP" },
       { property: "og:description", content: "Customer and vendor master records." },
@@ -40,8 +48,19 @@ function MasterData() {
   const { canEditMasterData: canEditJobs } = useRoles();
   const [custOpen, setCustOpen] = useState(false);
   const [vendOpen, setVendOpen] = useState(false);
-  const [cust, setCust] = useState({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
-  const [vend, setVend] = useState({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
+  const [cust, setCust] = useState({
+    company_name: "",
+    contact_name: "",
+    phone: "",
+    email: "",
+    address: "",
+  });
+  const [vend, setVend] = useState({
+    vendor_name: "",
+    service_type: "",
+    contact_person: "",
+    phone: "",
+  });
 
   const customers = useQuery({
     queryKey: ["customers-full"],
@@ -55,7 +74,10 @@ function MasterData() {
   const vendors = useQuery({
     queryKey: ["vendors-full"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("subcontractors_vendors").select("*").order("vendor_name");
+      const { data, error } = await supabase
+        .from("subcontractors_vendors")
+        .select("*")
+        .order("vendor_name");
       if (error) throw error;
       return data;
     },
@@ -63,7 +85,14 @@ function MasterData() {
 
   const addCustomer = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("save_customer", { _id: null as unknown as string, _company_name: cust.company_name, _contact_name: cust.contact_name, _phone: cust.phone, _email: cust.email, _address: cust.address });
+      const { error } = await supabase.rpc("save_customer", {
+        _id: null as unknown as string,
+        _company_name: cust.company_name,
+        _contact_name: cust.contact_name,
+        _phone: cust.phone,
+        _email: cust.email,
+        _address: cust.address,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -78,7 +107,13 @@ function MasterData() {
 
   const addVendor = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("save_vendor", { _id: null as unknown as string, _vendor_name: vend.vendor_name, _service_type: vend.service_type, _contact_person: vend.contact_person, _phone: vend.phone });
+      const { error } = await supabase.rpc("save_vendor", {
+        _id: null as unknown as string,
+        _vendor_name: vend.vendor_name,
+        _service_type: vend.service_type,
+        _contact_person: vend.contact_person,
+        _phone: vend.phone,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
