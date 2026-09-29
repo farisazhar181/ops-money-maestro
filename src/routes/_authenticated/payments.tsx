@@ -65,7 +65,10 @@ function PaymentsPage() {
       _notes: editTx.notes,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Transaction corrected");
     setEditTx(null);
     refresh();

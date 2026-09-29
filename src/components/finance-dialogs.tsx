@@ -63,7 +63,10 @@ export function EditApDialog({ row, onClose, onSaved }: { row: ApRow | null; onC
       _bill_date: f.bill_date,
     });
     setPending(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Vendor cost corrected");
     onSaved();
     onClose();
@@ -145,7 +148,10 @@ export function EditArDialog({ row, onClose, onSaved }: { row: ArRow | null; onC
       _due_date: addDays(f.invoice_date, terms),
     });
     setPending(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Invoice corrected");
     onSaved();
     onClose();
