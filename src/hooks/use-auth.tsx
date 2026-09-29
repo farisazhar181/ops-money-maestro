@@ -57,11 +57,11 @@ export function useRoles() {
     isFinance: roles.includes("finance"),
     isOperations: roles.includes("operations"),
     canSeeExecutive: roles.includes("owner") || roles.includes("finance"),
-    canEditJobs: roles.includes("owner") || roles.includes("operations"),
+    canEditJobs: roles.includes("owner") || roles.includes("finance") || roles.includes("operations"),
     canEditFinance: roles.includes("owner") || roles.includes("finance"),
     canManageUsers: roles.includes("owner") || roles.includes("finance"),
     canEditMasterData: roles.includes("owner") || roles.includes("finance") || roles.includes("operations"),
-    canManageOverhead: roles.includes("finance"),
+    canManageOverhead: roles.includes("owner") || roles.includes("finance"),
     primaryRole: roles.includes("owner") ? "owner" : roles[0],
   };
 }
