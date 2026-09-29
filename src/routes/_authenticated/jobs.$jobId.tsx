@@ -172,4 +172,4 @@ function JobDetail() {
 }
 
 function Detail({ label, value }: { label: string; value: string | null | undefined }) { return <div><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-sm font-medium">{value || "—"}</p></div>; }
-function Field({ label, value, onChange, type = "text", min }: { label: string; value: string; onChange: (value: string) => void; type?: string; min?: string }) { return <div className="space-y-2"><Label>{label}</Label><Input type={type} min={min} value={value} onChange={(event) => onChange(event.target.value)} /></div>; }
+function Field({ label, value, onChange, type = "text", min }: { label: string; value: string; onChange: (value: string) => void; type?: string; min?: string | undefined }) { return <div className="space-y-2"><Label>{label}</Label><Input type={type} min={min} value={value} onChange={(event) => onChange(event.target.value)} /></div>; }
