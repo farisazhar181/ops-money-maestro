@@ -115,7 +115,7 @@ function ReceivablesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {list.map((r) => {
+              {allRows.map((r) => {
                 const bal = num(r.remaining_amount);
                 const late = isOverdue(r.due_date, bal);
                 const d = daysUntil(r.due_date);
@@ -141,7 +141,7 @@ function ReceivablesPage() {
                       <StatusBadge status={late ? "Overdue" : r.status} />
                     </TableCell>
                     <TableCell className="text-right">
-                      {canEditFinance && bal > 0 && (
+                      {canEditFinance && bal > 0 && !r.is_void && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -154,7 +154,7 @@ function ReceivablesPage() {
                   </TableRow>
                 );
               })}
-              {list.length === 0 && (
+              {allRows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
                     No invoices yet. Issue one from a completed job sheet.

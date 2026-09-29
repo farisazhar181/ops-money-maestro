@@ -111,7 +111,7 @@ function PayablesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {list.map((r) => {
+              {allRows.map((r) => {
                 const bal = num(r.balance_remaining);
                 const late = isOverdue(r.due_date, bal);
                 return (
@@ -135,7 +135,7 @@ function PayablesPage() {
                       <StatusBadge status={late ? "Overdue" : r.status} />
                     </TableCell>
                     <TableCell className="text-right">
-                      {canEditFinance && bal > 0 && (
+                      {canEditFinance && bal > 0 && !r.is_void && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -155,7 +155,7 @@ function PayablesPage() {
                   </TableRow>
                 );
               })}
-              {list.length === 0 && (
+              {allRows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
                     No vendor bills logged yet.
