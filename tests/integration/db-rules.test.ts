@@ -13,16 +13,16 @@ const KEY = "sb_publishable_b200cDEnyBjb39jbSiQJUw_MTrjCxeD";
 const env = process.env;
 const enabled = !!(
   env.TEST_OWNER_TOKEN &&
-  env.TEST_FINANCE_EMAIL &&
-  env.TEST_OPS_EMAIL &&
-  env.TEST_PASSWORD
+  (env.TEST_FINANCE_TOKEN || (env.TEST_FINANCE_EMAIL && env.TEST_PASSWORD)) &&
+  (env.TEST_OPS_TOKEN || (env.TEST_OPS_EMAIL && env.TEST_PASSWORD))
 );
 type DB = SupabaseClient<Database>;
 const opts = { auth: { persistSession: false, autoRefreshToken: false } };
 
-async function signIn(email: string): Promise<DB> {
+async function signIn(email?: string, token?: string): Promise<DB> {
+  if (token) return createClient<Database>(URL, KEY, { ...opts, global: { headers: { Authorization: `Bearer ${token}` } } });
   const c = createClient<Database>(URL, KEY, opts);
-  const { error } = await c.auth.signInWithPassword({ email, password: env.TEST_PASSWORD! });
+  const { error } = await c.auth.signInWithPassword({ email: email!, password: env.TEST_PASSWORD! });
   if (error) throw error;
   return c;
 }
@@ -47,8 +47,8 @@ describe.skipIf(!enabled)("database rules", () => {
       ...opts,
       global: { headers: { Authorization: `Bearer ${env.TEST_OWNER_TOKEN}` } },
     });
-    finance = await signIn(env.TEST_FINANCE_EMAIL!);
-    ops = await signIn(env.TEST_OPS_EMAIL!);
+    finance = await signIn(env.TEST_FINANCE_EMAIL, env.TEST_FINANCE_TOKEN);
+    ops = await signIn(env.TEST_OPS_EMAIL, env.TEST_OPS_TOKEN);
   });
 
   it("Operations cannot read dashboard or report figures", async () => {
