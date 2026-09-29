@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
+import { paymentDateError } from "@/lib/finance-rules";
 import { useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/payables")({
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/payables")({
 function PayablesPage() {
   const qc = useQueryClient();
   const { canEditFinance } = useRoles();
-  const [payFor, setPayFor] = useState<{ id: string; label: string; balance: number } | null>(null);
+  const [payFor, setPayFor] = useState<{ id: string; label: string; balance: number; minDate: string } | null>(null);
   const [pay, setPay] = useState({ amount: "", date: today() });
 
   const { data: rows } = useQuery({
@@ -50,6 +51,8 @@ function PayablesPage() {
   const record = useMutation({
     mutationFn: async () => {
       if (!payFor) return;
+      const dateErr = paymentDateError(pay.date, payFor.minDate);
+      if (dateErr) throw new Error(dateErr);
       const { error } = await supabase.rpc("record_ap_payment", {
         _ap_id: payFor.id,
         _payment_date: pay.date,
@@ -69,7 +72,8 @@ function PayablesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const list = rows ?? [];
+  const allRows = rows ?? [];
+  const list = allRows.filter((r) => !r.is_void);
   const outstanding = list.reduce((s, r) => s + num(r.balance_remaining), 0);
   const dueThisWeek = list.filter(
     (r) => num(r.balance_remaining) > 0 && daysUntil(r.due_date) <= 7 && daysUntil(r.due_date) >= 0,
@@ -107,11 +111,11 @@ function PayablesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {list.map((r) => {
+              {allRows.map((r) => {
                 const bal = num(r.balance_remaining);
                 const late = isOverdue(r.due_date, bal);
                 return (
-                  <TableRow key={r.id} className={late ? "bg-destructive/5" : undefined}>
+                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined} title={r.is_void ? `Voided ${fmtDate(r.voided_at)}: ${r.void_reason ?? ""}` : undefined}>
                     <TableCell className="font-medium">{r.subcontractors_vendors?.vendor_name ?? "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
                     <TableCell>{r.item_cost_description}</TableCell>
@@ -128,10 +132,10 @@ function PayablesPage() {
                     <TableCell className="text-right">{idr(r.paid_amount)}</TableCell>
                     <TableCell className="text-right font-medium">{idr(bal)}</TableCell>
                     <TableCell>
-                      <StatusBadge status={late ? "Overdue" : r.status} />
+                      <StatusBadge status={r.is_void ? "Voided" : late ? "Overdue" : r.status} />
                     </TableCell>
                     <TableCell className="text-right">
-                      {canEditFinance && bal > 0 && (
+                      {canEditFinance && bal > 0 && !r.is_void && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -140,6 +144,7 @@ function PayablesPage() {
                               id: r.id,
                               label: r.subcontractors_vendors?.vendor_name ?? "vendor",
                               balance: bal,
+                              minDate: r.bill_date,
                             })
                           }
                         >
@@ -150,7 +155,7 @@ function PayablesPage() {
                   </TableRow>
                 );
               })}
-              {list.length === 0 && (
+              {allRows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
                     No vendor bills logged yet.
@@ -173,8 +178,8 @@ function PayablesPage() {
               <Input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
+              <Label>Date (not before {fmtDate(payFor?.minDate)})</Label>
+              <Input type="date" min={payFor?.minDate} value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
             </div>
           </div>
           <DialogFooter>

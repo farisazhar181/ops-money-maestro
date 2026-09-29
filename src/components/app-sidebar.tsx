@@ -9,6 +9,7 @@ import {
   Database,
   Settings,
   Ship,
+  Coins,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,14 +42,19 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const path = useRouterState({ select: (r) => r.location.pathname });
-  const { canSeeExecutive, canManageUsers, canEditJobs } = useRoles();
+  const { canSeeExecutive, canManageUsers, canEditMasterData } = useRoles();
 
   const items = [
     ...nav.filter((i) => !i.exec || canSeeExecutive),
-    ...(canSeeExecutive ? [{ title: "Reports", url: "/reports", icon: ChartNoAxesCombined }] : []),
+    ...(canSeeExecutive
+      ? [
+          { title: "Overhead Costs", url: "/overhead", icon: Coins },
+          { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+        ]
+      : []),
   ];
   const administrationItems = administration.filter((item) =>
-    item.url === "/settings" ? canManageUsers : canEditJobs,
+    item.url === "/settings" ? canManageUsers : canEditMasterData,
   );
   const isActive = (url: string) => path === url || path.startsWith(url + "/");
 

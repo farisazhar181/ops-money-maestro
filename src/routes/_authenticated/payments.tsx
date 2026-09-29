@@ -1,26 +1,20 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { idr, num, fmtDate, today } from "@/lib/format";
+import { idr, num, fmtDate } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
+import { cashFlowDirection, cashFlowLabel } from "@/lib/finance-rules";
 
 export const Route = createFileRoute("/_authenticated/payments")({
   head: () => ({
@@ -28,167 +22,81 @@ export const Route = createFileRoute("/_authenticated/payments")({
       { title: "Cash Flow Ledger | Loka Logistics ERP" },
       {
         name: "description",
-        content: "Every customer receipt, vendor payment and operational expense in one cash flow ledger.",
+        content:
+          "Customer receipts, vendor payments and overhead payments in one operating cash flow ledger.",
       },
       { property: "og:title", content: "Cash Flow Ledger | Loka Logistics ERP" },
-      { property: "og:description", content: "Actual cash in and out for Loka Logistics operations." },
+      {
+        property: "og:description",
+        content: "Actual operating cash in and out for Loka Logistics.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PaymentsPage,
 });
 
 function PaymentsPage() {
-  const qc = useQueryClient();
-  const { canEditFinance } = useRoles();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    reference_type: "OPERATIONAL_EXPENSE",
-    transaction_date: today(),
-    amount: "",
-    payment_method: "Bank Transfer",
-    notes: "",
-  });
+  const { canSeeExecutive } = useRoles();
 
-  const { data: rows } = useQuery({
+  const { data } = useQuery({
     queryKey: ["payments"],
+    enabled: canSeeExecutive,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payment_transactions")
-        .select("*")
-        .order("transaction_date", { ascending: false });
-      if (error) throw error;
-      return data;
+      const [rows, summary] = await Promise.all([
+        supabase
+          .from("payment_transactions")
+          .select("*")
+          .order("transaction_date", { ascending: false }),
+        supabase.rpc("report_summary"),
+      ]);
+      if (rows.error) throw rows.error;
+      if (summary.error) throw summary.error;
+      return { rows: rows.data ?? [], summary: summary.data?.[0] };
     },
   });
 
-  const create = useMutation({
-    mutationFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const { error } = await supabase.from("payment_transactions").insert({
-        reference_type: form.reference_type as "AR_RECEIPT" | "AP_PAYMENT" | "OPERATIONAL_EXPENSE",
-        transaction_date: form.transaction_date,
-        amount: num(form.amount),
-        payment_method: form.payment_method as "Bank Transfer" | "Cash" | "Giro",
-        notes: form.notes,
-        created_by: userRes.user?.id ?? null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Transaction recorded");
-      setOpen(false);
-      setForm({ ...form, amount: "", notes: "" });
-      qc.invalidateQueries({ queryKey: ["payments"] });
-      qc.invalidateQueries({ queryKey: ["dashboard"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const list = rows ?? [];
-  const inflow = list.filter((t) => t.reference_type === "AR_RECEIPT").reduce((s, t) => s + num(t.amount), 0);
-  const outflow = list.filter((t) => t.reference_type !== "AR_RECEIPT").reduce((s, t) => s + num(t.amount), 0);
+  const list = data?.rows ?? [];
+  const m = data?.summary;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Cash Flow Ledger</h1>
-          <p className="text-sm text-muted-foreground">Actual money in and out across all jobs.</p>
-        </div>
-        {canEditFinance && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Record transaction
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Record transaction</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Select
-                    value={form.reference_type}
-                    onValueChange={(v) => setForm({ ...form, reference_type: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AR_RECEIPT">Customer receipt (AR)</SelectItem>
-                      <SelectItem value="AP_PAYMENT">Vendor payment (AP)</SelectItem>
-                      <SelectItem value="OPERATIONAL_EXPENSE">Operational expense</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Date</Label>
-                    <Input
-                      type="date"
-                      value={form.transaction_date}
-                      onChange={(e) => setForm({ ...form, transaction_date: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Amount (IDR)</Label>
-                    <Input
-                      type="number"
-                      value={form.amount}
-                      onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Payment method</Label>
-                  <Select
-                    value={form.payment_method}
-                    onValueChange={(v) => setForm({ ...form, payment_method: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="Cash">Cash</SelectItem>
-                      <SelectItem value="Giro">Giro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={() => create.mutate()} disabled={!form.amount || create.isPending}>
-                  Save transaction
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+      <div>
+        <h1 className="font-display text-2xl font-semibold">Cash Flow Ledger</h1>
+        <p className="text-sm text-muted-foreground">
+          Entries are created automatically when a vendor bill, customer invoice or overhead cost is
+          paid.
+        </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cash in</CardDescription>
-            <CardTitle className="font-display text-xl text-success">{idr(inflow)}</CardTitle>
+            <CardDescription>Operating cash in</CardDescription>
+            <CardTitle className="font-display text-xl text-success">
+              {idr(m?.op_cash_in)}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cash out</CardDescription>
-            <CardTitle className="font-display text-xl text-destructive">{idr(outflow)}</CardTitle>
+            <CardDescription>Operating cash out</CardDescription>
+            <CardTitle className="font-display text-xl text-destructive">
+              {idr(m?.op_cash_out)}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Net cash flow</CardDescription>
-            <CardTitle className="font-display text-xl">{idr(inflow - outflow)}</CardTitle>
+            <CardDescription>Net operating cash flow</CardDescription>
+            <CardTitle className="font-display text-xl">{idr(m?.net_operating_cash)}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Financing (investor, separate)</CardDescription>
+            <CardTitle className="font-display text-xl">{idr(m?.net_financing)}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -210,9 +118,9 @@ function PaymentsPage() {
             </TableHeader>
             <TableBody>
               {list.map((t) => {
-                const inbound = t.reference_type === "AR_RECEIPT";
+                const inbound = cashFlowDirection(t.reference_type) === "in";
                 return (
-                  <TableRow key={t.id}>
+                  <TableRow key={t.id} className={t.is_void ? "opacity-50" : undefined}>
                     <TableCell>{fmtDate(t.transaction_date)}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="gap-1">
@@ -221,16 +129,28 @@ function PaymentsPage() {
                         ) : (
                           <ArrowDownRight className="h-3 w-3 text-destructive" />
                         )}
-                        {t.reference_type.replace("_", " ")}
+                        {cashFlowLabel(t.reference_type)}
                       </Badge>
+                      {t.is_void && (
+                        <Badge variant="secondary" className="ml-2">
+                          Voided
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>{t.payment_method}</TableCell>
-                    <TableCell className="text-muted-foreground">{t.notes}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {t.notes}
+                      {t.is_void && (
+                        <span className="block text-xs">
+                          Voided {fmtDate(t.voided_at)}: {t.void_reason}
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell
-                      className={`text-right font-medium ${inbound ? "text-success" : "text-destructive"}`}
+                      className={`text-right font-medium ${t.is_void ? "line-through" : inbound ? "text-success" : "text-destructive"}`}
                     >
                       {inbound ? "+" : "-"}
-                      {idr(t.amount)}
+                      {idr(num(t.amount))}
                     </TableCell>
                   </TableRow>
                 );
