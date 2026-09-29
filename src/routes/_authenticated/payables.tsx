@@ -115,7 +115,7 @@ function PayablesPage() {
                 const bal = num(r.balance_remaining);
                 const late = isOverdue(r.due_date, bal);
                 return (
-                  <TableRow key={r.id} className={late ? "bg-destructive/5" : undefined}>
+                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined} title={r.is_void ? `Voided ${fmtDate(r.voided_at)}: ${r.void_reason ?? ""}` : undefined}>
                     <TableCell className="font-medium">{r.subcontractors_vendors?.vendor_name ?? "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
                     <TableCell>{r.item_cost_description}</TableCell>

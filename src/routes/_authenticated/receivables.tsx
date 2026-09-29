@@ -120,7 +120,7 @@ function ReceivablesPage() {
                 const late = isOverdue(r.due_date, bal);
                 const d = daysUntil(r.due_date);
                 return (
-                  <TableRow key={r.id} className={late ? "bg-destructive/5" : undefined}>
+                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined} title={r.is_void ? `Voided ${fmtDate(r.voided_at)}: ${r.void_reason ?? ""}` : undefined}>
                     <TableCell className="font-medium">{r.invoice_no}</TableCell>
                     <TableCell>{r.customers?.company_name ?? "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
