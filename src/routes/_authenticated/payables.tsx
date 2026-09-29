@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Banknote } from "lucide-react";
+import { Ban, Banknote, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
 import { paymentDateError } from "@/lib/finance-rules";
 import { useRoles } from "@/hooks/use-auth";
+import { VoidDialog, VoidedNote } from "@/components/record-actions";
+import { EditApDialog, type ApRow } from "@/components/finance-dialogs";
 
 export const Route = createFileRoute("/_authenticated/payables")({
   head: () => ({
@@ -35,6 +37,11 @@ function PayablesPage() {
   const { canEditFinance } = useRoles();
   const [payFor, setPayFor] = useState<{ id: string; label: string; balance: number; minDate: string } | null>(null);
   const [pay, setPay] = useState({ amount: "", date: today() });
+  const [editRow, setEditRow] = useState<ApRow | null>(null);
+  const [voidId, setVoidId] = useState<string | null>(null);
+  const refresh = () => {
+    for (const k of ["ap", "dashboard", "payments", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+  };
 
   const { data: rows } = useQuery({
     queryKey: ["ap"],
@@ -115,8 +122,8 @@ function PayablesPage() {
                 const bal = num(r.balance_remaining);
                 const late = isOverdue(r.due_date, bal);
                 return (
-                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined} title={r.is_void ? `Voided ${fmtDate(r.voided_at)}: ${r.void_reason ?? ""}` : undefined}>
-                    <TableCell className="font-medium">{r.subcontractors_vendors?.vendor_name ?? "-"}</TableCell>
+                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined}>
+                    <TableCell className="font-medium">{r.subcontractors_vendors?.vendor_name ?? "-"}{r.is_void && <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />}</TableCell>
                     <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
                     <TableCell>{r.item_cost_description}</TableCell>
                     <TableCell>{r.payment_terms_days}d</TableCell>
@@ -134,7 +141,13 @@ function PayablesPage() {
                     <TableCell>
                       <StatusBadge status={r.is_void ? "Voided" : late ? "Overdue" : r.status} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="whitespace-nowrap text-right">
+                      {canEditFinance && !r.is_void && (
+                        <>
+                          <Button size="icon" variant="ghost" title="Edit" onClick={() => setEditRow(r)}><Pencil className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(r.id)}><Ban className="h-4 w-4" /></Button>
+                        </>
+                      )}
                       {canEditFinance && bal > 0 && !r.is_void && (
                         <Button
                           size="sm"
@@ -167,6 +180,18 @@ function PayablesPage() {
         </CardContent>
       </Card>
 
+      <EditApDialog row={editRow} onClose={() => setEditRow(null)} onSaved={refresh} />
+      <VoidDialog
+        open={!!voidId}
+        onOpenChange={(o) => !o && setVoidId(null)}
+        title="Void vendor cost"
+        onConfirm={async (reason) => {
+          const { error } = await supabase.rpc("void_ap", { _id: voidId ?? "", _reason: reason });
+          if (error) throw error;
+          toast.success("Vendor cost voided");
+          refresh();
+        }}
+      />
       <Dialog open={!!payFor} onOpenChange={(o) => !o && setPayFor(null)}>
         <DialogContent>
           <DialogHeader>

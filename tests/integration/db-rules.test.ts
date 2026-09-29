@@ -30,7 +30,7 @@ const today = jakartaDate();
 const yesterday = jakartaDate(new Date(Date.now() - 86400000));
 
 describe.skipIf(!enabled)("database rules", () => {
-  let owner: DB, finance: DB, ops: DB, financeId: string;
+  let owner: DB, finance: DB, ops: DB;
   const summary = async () => {
     const { data, error } = await finance.rpc("report_summary");
     if (error) throw error;
@@ -49,7 +49,6 @@ describe.skipIf(!enabled)("database rules", () => {
     });
     finance = await signIn(env.TEST_FINANCE_EMAIL!);
     ops = await signIn(env.TEST_OPS_EMAIL!);
-    financeId = (await finance.auth.getUser()).data.user!.id;
   });
 
   it("Operations cannot read dashboard or report figures", async () => {
@@ -64,24 +63,32 @@ describe.skipIf(!enabled)("database rules", () => {
   });
 
   it("Finance can create and edit customers and vendors; referenced ones cannot be deleted", async () => {
-    const c = await finance
-      .from("customers")
-      .insert({ company_name: "TEST customer" })
-      .select("id")
-      .single();
+    const c = await finance.rpc("save_customer", {
+      _id: null as unknown as string,
+      _company_name: "TEST customer",
+      _contact_name: "",
+      _phone: "",
+      _email: "",
+      _address: "",
+    });
     expect(c.error).toBeNull();
-    const u = await finance
-      .from("customers")
-      .update({ phone: "000" })
-      .eq("id", c.data!.id)
-      .select("id");
+    const u = await finance.rpc("save_customer", {
+      _id: c.data!.id,
+      _company_name: "TEST customer",
+      _contact_name: "",
+      _phone: "000",
+      _email: "",
+      _address: "",
+    });
     expect(u.error).toBeNull();
-    expect(u.data).toHaveLength(1);
-    const v = await finance
-      .from("subcontractors_vendors")
-      .insert({ vendor_name: "TEST vendor" })
-      .select("id")
-      .single();
+    expect(u.data!.phone).toBe("000");
+    const v = await finance.rpc("save_vendor", {
+      _id: null as unknown as string,
+      _vendor_name: "TEST vendor",
+      _service_type: "",
+      _contact_person: "",
+      _phone: "",
+    });
     expect(v.error).toBeNull();
     expect((await owner.from("customers").delete().eq("id", c.data!.id)).error).toBeNull();
     expect(
@@ -100,15 +107,23 @@ describe.skipIf(!enabled)("database rules", () => {
   it("Pipeline estimates stay out of revenue/P&L; closing with blank or zero actuals is rejected", async () => {
     const before = await month();
     const beforeSummary = await summary();
-    const job = await ops
-      .from("jobs")
-      .insert({ job_sheet_no: `TEST-${Date.now()}`, order_date: today, status: "Pipeline" })
-      .select("id")
-      .single();
+    const job = await ops.rpc("create_job", {
+      _job_sheet_no: `TEST-${Date.now()}`,
+      _customer_id: null as unknown as string,
+      _order_date: today,
+      _service_type: "",
+      _unit_type: "",
+      _quantity: "",
+      _volume_weight: "",
+      _origin: "",
+      _destination: "",
+    });
     expect(job.error).toBeNull();
-    const fin = await finance
-      .from("job_financials")
-      .insert({ job_id: job.data!.id, estimated_selling: 777000000, estimated_buying: 1 });
+    const fin = await finance.rpc("set_job_estimates", {
+      _job_id: job.data!.id,
+      _estimated_selling: 777000000,
+      _estimated_buying: 1,
+    });
     expect(fin.error).toBeNull();
     const after = await month();
     expect(num(after.revenue)).toBe(num(before.revenue));
@@ -142,17 +157,12 @@ describe.skipIf(!enabled)("database rules", () => {
   it("overhead reduces net profit; paying it is operating cash out; voiding removes both", async () => {
     const s0 = await summary();
     const m0 = await month();
-    const oh = await finance
-      .from("overhead_costs")
-      .insert({
-        cost_date: today,
-        cost_type: "Fixed",
-        amount: 1234,
-        note: "TEST overhead",
-        created_by: financeId,
-      })
-      .select("id")
-      .single();
+    const oh = await finance.rpc("create_overhead", {
+      _date: today,
+      _type: "Fixed",
+      _amount: 1234,
+      _note: "TEST overhead",
+    });
     expect(oh.error).toBeNull();
     const s1 = await summary();
     expect(num(s0.net_profit) - num(s1.net_profit)).toBe(1234);
@@ -168,14 +178,12 @@ describe.skipIf(!enabled)("database rules", () => {
     expect(again.error?.message).toMatch(/already paid/);
     expect(num((await summary()).op_cash_out) - num(s0.op_cash_out)).toBe(1234);
 
-    const direct = await finance
-      .from("payment_transactions")
-      .insert({
-        reference_type: "OPERATIONAL_EXPENSE",
-        amount: 1,
-        payment_method: "Cash",
-        transaction_date: today,
-      });
+    const direct = await finance.from("payment_transactions").insert({
+      reference_type: "OPERATIONAL_EXPENSE",
+      amount: 1,
+      payment_method: "Cash",
+      transaction_date: today,
+    });
     expect(direct.error).not.toBeNull();
 
     expect(
@@ -188,17 +196,12 @@ describe.skipIf(!enabled)("database rules", () => {
 
   it("investor money is financing only: never profit or operating cash", async () => {
     const s0 = await summary();
-    const inv = await finance
-      .from("investor_transactions")
-      .insert({
-        transaction_date: today,
-        transaction_type: "Loan In",
-        amount: 5000000,
-        note: "TEST loan",
-        created_by: financeId,
-      })
-      .select("id")
-      .single();
+    const inv = await finance.rpc("create_investor_transaction", {
+      _date: today,
+      _type: "Loan In",
+      _amount: 5000000,
+      _note: "TEST loan",
+    });
     expect(inv.error).toBeNull();
     const s1 = await summary();
     expect(num(s1.revenue)).toBe(num(s0.revenue));
@@ -219,17 +222,14 @@ describe.skipIf(!enabled)("database rules", () => {
   it("payment dates before the bill date are rejected; voided bills leave every total", async () => {
     const s0 = await summary();
     const job = await owner.from("jobs").select("id").eq("is_void", false).limit(1).single();
-    const ap = await ops
-      .from("accounts_payable")
-      .insert({
-        job_id: job.data!.id,
-        item_cost_description: "TEST bill",
-        invoice_amount: 4321,
-        bill_date: today,
-        due_date: today,
-      })
-      .select("id")
-      .single();
+    const ap = await ops.rpc("create_ap", {
+      _job_id: job.data!.id,
+      _vendor_id: null as unknown as string,
+      _description: "TEST bill",
+      _amount: 4321,
+      _bill_date: today,
+      _terms: 0,
+    });
     expect(ap.error).toBeNull();
     expect(num((await summary()).cost) - num(s0.cost)).toBe(4321);
     const early = await finance.rpc("record_ap_payment", {

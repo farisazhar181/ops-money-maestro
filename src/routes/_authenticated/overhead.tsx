@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Banknote, Ban, Plus, ShieldAlert } from "lucide-react";
+import { Banknote, Ban, Pencil, Plus, ShieldAlert } from "lucide-react";
+import { VoidedNote } from "@/components/record-actions";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ function OverheadPage() {
   const qc = useQueryClient();
   const { canSeeExecutive, canManageOverhead, loading } = useRoles();
   const [addOpen, setAddOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     cost_date: today(),
     cost_type: "Fixed",
@@ -95,19 +97,21 @@ function OverheadPage() {
       const amount = numOrNull(form.amount);
       if (amount === null || amount <= 0) throw new Error("Amount must be greater than zero");
       if (!form.note.trim()) throw new Error("A note is required");
-      const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("overhead_costs").insert({
-        cost_date: form.cost_date,
-        cost_type: form.cost_type as "Fixed" | "Variable",
-        amount,
-        note: form.note.trim(),
-        created_by: u.user?.id ?? "",
-      });
+      const args = {
+        _date: form.cost_date,
+        _type: form.cost_type as "Fixed" | "Variable",
+        _amount: amount,
+        _note: form.note.trim(),
+      };
+      const { error } = editId
+        ? await supabase.rpc("edit_overhead", { _id: editId, ...args })
+        : await supabase.rpc("create_overhead", args);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Overhead cost recorded");
+      toast.success(editId ? "Overhead cost corrected" : "Overhead cost recorded");
       setAddOpen(false);
+      setEditId(null);
       setForm({ cost_date: today(), cost_type: "Fixed", amount: "", note: "" });
       refresh();
     },
@@ -174,11 +178,16 @@ function OverheadPage() {
           <h1 className="font-display text-2xl font-semibold">Overhead Costs</h1>
           <p className="text-sm text-muted-foreground">
             Subtracted from Net Profit in the month of the cost date.{" "}
-            {canManageOverhead ? "" : "Owner view is read-only."}
           </p>
         </div>
         {canManageOverhead && (
-          <Button onClick={() => setAddOpen(true)}>
+          <Button
+            onClick={() => {
+              setEditId(null);
+              setForm({ cost_date: today(), cost_type: "Fixed", amount: "", note: "" });
+              setAddOpen(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" /> Add overhead
           </Button>
         )}
@@ -215,9 +224,7 @@ function OverheadPage() {
                     <TableCell>
                       {r.note}
                       {r.is_void && (
-                        <span className="block text-xs text-muted-foreground">
-                          Voided {fmtDate(r.voided_at)}: {r.void_reason}
-                        </span>
+                        <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />
                       )}
                     </TableCell>
                     <TableCell>
@@ -245,6 +252,22 @@ function OverheadPage() {
                               <Banknote className="mr-1 h-4 w-4" /> Pay
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditId(r.id);
+                              setForm({
+                                cost_date: r.cost_date,
+                                cost_type: r.cost_type,
+                                amount: String(r.amount),
+                                note: r.note,
+                              });
+                              setAddOpen(true);
+                            }}
+                          >
+                            <Pencil className="mr-1 h-4 w-4" /> Edit
+                          </Button>
                           <Button size="sm" variant="ghost" onClick={() => setVoidFor(r)}>
                             <Ban className="mr-1 h-4 w-4" /> Void
                           </Button>
@@ -269,7 +292,7 @@ function OverheadPage() {
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add overhead cost</DialogTitle>
+            <DialogTitle>{editId ? "Edit overhead cost" : "Add overhead cost"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">

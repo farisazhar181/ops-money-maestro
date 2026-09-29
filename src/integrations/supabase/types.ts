@@ -802,6 +802,178 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_ap: {
+        Args: {
+          _amount: number
+          _bill_date: string
+          _description: string
+          _job_id: string
+          _payment_type?: Database["public"]["Enums"]["payment_type"]
+          _terms: number
+          _vendor_id: string
+        }
+        Returns: {
+          attachment_path: string | null
+          balance_remaining: number | null
+          bill_date: string
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_amount: number
+          is_void: boolean
+          item_cost_description: string | null
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          status: Database["public"]["Enums"]["ap_status"]
+          updated_at: string
+          vendor_id: string | null
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_payable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_ar: {
+        Args: {
+          _amount: number
+          _invoice_date: string
+          _invoice_no: string
+          _job_id: string
+          _terms: number
+        }
+        Returns: {
+          amount: number
+          attachment_path: string | null
+          created_at: string
+          customer_id: string | null
+          due_date: string
+          id: string
+          invoice_date: string
+          invoice_no: string
+          is_void: boolean
+          job_id: string | null
+          paid_amount: number
+          payment_terms_days: number
+          remaining_amount: number | null
+          status: Database["public"]["Enums"]["ar_status"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "accounts_receivable"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_investor_transaction: {
+        Args: {
+          _amount: number
+          _date: string
+          _note: string
+          _type: Database["public"]["Enums"]["investor_transaction_type"]
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["investor_transaction_type"]
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "investor_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_job: {
+        Args: {
+          _customer_id: string
+          _destination: string
+          _estimated_buying?: number
+          _estimated_selling?: number
+          _job_sheet_no: string
+          _order_date: string
+          _origin: string
+          _quantity: string
+          _service_type: string
+          _unit_type: string
+          _volume_weight: string
+        }
+        Returns: {
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          destination: string | null
+          id: string
+          is_void: boolean
+          job_sheet_no: string
+          order_date: string
+          origin: string | null
+          quantity: string | null
+          service_type: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          unit_type: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+          volume_weight: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_overhead: {
+        Args: {
+          _amount: number
+          _date: string
+          _note: string
+          _type: Database["public"]["Enums"]["overhead_type"]
+        }
+        Returns: {
+          amount: number
+          cost_date: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          payment_transaction_id: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "overhead_costs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       deactivate_user: { Args: { _user_id: string }; Returns: undefined }
       edit_ap: {
         Args: {
@@ -1112,6 +1284,81 @@ export type Database = {
           pipeline_value: number
           revenue: number
         }[]
+      }
+      save_customer: {
+        Args: {
+          _address: string
+          _company_name: string
+          _contact_name: string
+          _email: string
+          _id: string
+          _phone: string
+        }
+        Returns: {
+          address: string | null
+          company_name: string
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "customers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_vendor: {
+        Args: {
+          _contact_person: string
+          _id: string
+          _phone: string
+          _service_type: string
+          _vendor_name: string
+        }
+        Returns: {
+          contact_person: string | null
+          created_at: string
+          id: string
+          phone: string | null
+          service_type: string | null
+          vendor_name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subcontractors_vendors"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_attachment: {
+        Args: { _id: string; _kind: string; _path: string }
+        Returns: undefined
+      }
+      set_job_estimates: {
+        Args: {
+          _estimated_buying: number
+          _estimated_selling: number
+          _job_id: string
+        }
+        Returns: {
+          actual_buying: number | null
+          actual_selling: number | null
+          estimated_buying: number
+          estimated_selling: number
+          job_id: string
+          margin: number | null
+          pct_margin: number | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "job_financials"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_job_operations: {
         Args: {

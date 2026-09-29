@@ -63,7 +63,7 @@ function MasterData() {
 
   const addCustomer = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("customers").insert(cust);
+      const { error } = await supabase.rpc("save_customer", { _id: null as unknown as string, _company_name: cust.company_name, _contact_name: cust.contact_name, _phone: cust.phone, _email: cust.email, _address: cust.address });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -78,7 +78,7 @@ function MasterData() {
 
   const addVendor = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("subcontractors_vendors").insert(vend);
+      const { error } = await supabase.rpc("save_vendor", { _id: null as unknown as string, _vendor_name: vend.vendor_name, _service_type: vend.service_type, _contact_person: vend.contact_person, _phone: vend.phone });
       if (error) throw error;
     },
     onSuccess: () => {

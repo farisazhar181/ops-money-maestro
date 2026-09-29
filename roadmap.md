@@ -7,7 +7,7 @@
 - [x] Add reports and CSV exports
 - [x] Refresh generated database types
 - [x] Verify builds, roles, and workflows
-- [ ] Make Overhead and Investor pages read-only for Owner and manageable by Finance
+- [x] Overhead and Investor pages: Owner and Finance create/edit/void (Owner decision)
 
 ## Correctness fixes (Sep 29)
 - [x] Totals from database reports (summary, monthly, aging); voided rows excluded; Operations blocked
@@ -18,4 +18,12 @@
 - [x] Finance edits master data; referenced records undeletable
 - [x] Owner audit coverage; tests; lint + build
 - [ ] Statistics page (next batch)
-- [ ] Investor Transactions page (next batch; database side ready)
+- [x] Investor Transactions page
+
+## Batch B — interface + validated writes (Sep 29)
+- [x] Edit/void UI for jobs, AP, AR, cash-flow; voided rows muted with who/when/why; blocked voids list dependents
+- [x] Overhead page edit + Owner access; Investor page with totals
+- [x] All business writes through database functions; direct INSERT/UPDATE revoked; every write logged
+- [x] Job history shows before/after (role-limited)
+- [x] Close financials dialog uses Pipeline/Active/Closed
+- [x] Tests (18 pass), build OK, lint: formatting-only issues
