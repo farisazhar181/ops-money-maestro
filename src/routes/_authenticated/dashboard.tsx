@@ -9,13 +9,14 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   ShieldAlert,
+  Landmark,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { idr, num, pct, fmtDate, isOverdue } from "@/lib/format";
+import { idr, num, pct, fmtDate } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -77,26 +78,17 @@ function Dashboard() {
 
   const { data } = useQuery({
     queryKey: ["dashboard"],
+    enabled: canSeeExecutive,
     queryFn: async () => {
-      const [jobs, ar, ap, tx] = await Promise.all([
-        supabase.from("jobs").select("id, status, job_financials(estimated_selling)"),
-        supabase
-          .from("accounts_receivable")
-          .select("id, invoice_no, amount, paid_amount, remaining_amount, due_date, status, customers(company_name)")
-          .order("due_date", { ascending: true }),
-        supabase
-          .from("accounts_payable")
-          .select(
-            "id, invoice_amount, paid_amount, balance_remaining, due_date, status, subcontractors_vendors(vendor_name)",
-          )
-          .order("due_date", { ascending: true }),
-        supabase.from("payment_transactions").select("amount, reference_type"),
+      const [summary, ar, ap] = await Promise.all([
+        supabase.rpc("report_summary"),
+        supabase.rpc("report_aging", { _kind: "ar" }),
+        supabase.rpc("report_aging", { _kind: "ap" }),
       ]);
-      if (jobs.error) throw jobs.error;
+      if (summary.error) throw summary.error;
       if (ar.error) throw ar.error;
       if (ap.error) throw ap.error;
-      if (tx.error) throw tx.error;
-      return { jobs: jobs.data, ar: ar.data, ap: ap.data, tx: tx.data };
+      return { summary: summary.data?.[0], ar: ar.data ?? [], ap: ap.data ?? [] };
     },
   });
 
@@ -118,74 +110,75 @@ function Dashboard() {
     );
   }
 
-  const jobs = data?.jobs ?? [];
-  const ar = data?.ar ?? [];
-  const ap = data?.ap ?? [];
-  const tx = data?.tx ?? [];
-
-  const revenue = ar.reduce((s, r) => s + num(r.amount), 0);
-  const arReceipts = ar.reduce((s, r) => s + num(r.paid_amount), 0);
-  const arOutstanding = ar.reduce((s, r) => s + num(r.remaining_amount), 0);
-  const payable = ap.reduce((s, r) => s + num(r.invoice_amount), 0);
-  const apPayments = ap.reduce((s, r) => s + num(r.paid_amount), 0);
-  const apOutstanding = ap.reduce((s, r) => s + num(r.balance_remaining), 0);
-  const netProfit = revenue - payable;
-  const ratio = revenue > 0 ? netProfit / revenue : 0;
-  const assets = arOutstanding + arReceipts;
-  const dar = assets > 0 ? payable / assets : 0;
-  const cashIn = tx.filter((t) => t.reference_type === "AR_RECEIPT").reduce((s, t) => s + num(t.amount), 0);
-  const cashOut = tx
-    .filter((t) => t.reference_type !== "AR_RECEIPT")
-    .reduce((s, t) => s + num(t.amount), 0);
-
-  const overdueAr = ar.filter((r) => isOverdue(r.due_date, num(r.remaining_amount)));
-  const upcomingAp = ap.filter((r) => num(r.balance_remaining) > 0).slice(0, 6);
+  const m = data?.summary;
+  const revenue = num(m?.revenue);
+  const cost = num(m?.cost);
+  const overhead = num(m?.overhead);
+  const netProfit = num(m?.net_profit);
+  const ratio = revenue > 0 ? netProfit / revenue : null;
+  const ltr = m?.liabilities_to_revenue == null ? null : num(m.liabilities_to_revenue);
+  const netOperating = num(m?.net_operating_cash);
+  const netFinancing = num(m?.net_financing);
+  const overdueAr = (data?.ar ?? []).filter((r) => num(r.days_overdue) > 0);
+  const upcomingAp = (data?.ap ?? []).slice(0, 6);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold">Executive Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          {jobs.length} job sheets &middot; {jobs.filter((j) => j.status === "Closed").length} closed
+          {num(m?.jobs_total)} job sheets &middot; {num(m?.jobs_closed)} closed · figures exclude voided records
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Kpi label="Total Sales Revenue (Accrual)" value={idr(revenue)} icon={TrendingUp} sub={`Pipeline value ${idr(jobs.reduce((s, j) => s + num(j.job_financials?.estimated_selling), 0))}`} />
+        <Kpi label="Total Sales Revenue (Accrual)" value={idr(revenue)} icon={TrendingUp} sub="Non-void issued invoices" />
         <Kpi
           label="Accounts Receivable"
-          value={idr(arOutstanding)}
-          sub={`Accrual ${idr(revenue)} · Received ${idr(arReceipts)}`}
+          value={idr(m?.ar_outstanding)}
+          sub={`Invoiced ${idr(revenue)} · Received ${idr(m?.ar_received)}`}
           icon={ReceiptText}
           tone="warning"
         />
         <Kpi
           label="Accounts Payable"
-          value={idr(apOutstanding)}
-          sub={`Accrual ${idr(payable)} · Paid ${idr(apPayments)}`}
+          value={idr(m?.ap_outstanding)}
+          sub={`Billed ${idr(cost)} · Paid ${idr(m?.ap_paid)}`}
           icon={Wallet}
           tone="destructive"
         />
         <Kpi
-          label="Net Profit (Pre-Overhead)"
+          label="Net Profit"
           value={idr(netProfit)}
-          sub={`Profitability ratio ${pct(ratio)}`}
+          sub={`Revenue − cost ${idr(cost)} − overhead ${idr(overhead)} · margin ${pct(ratio)}`}
           icon={PiggyBank}
           tone={netProfit >= 0 ? "success" : "destructive"}
         />
         <Kpi
-          label="Debt-to-Asset Ratio"
-          value={pct(dar)}
-          sub={`Liabilities ${idr(payable)} vs assets ${idr(assets)}`}
+          label="Liabilities to Revenue Ratio"
+          value={pct(ltr)}
+          sub={`Outstanding payables ${idr(m?.ap_outstanding)} ÷ revenue ${idr(revenue)}`}
           icon={Scale}
-          tone={dar > 0.6 ? "destructive" : "success"}
+          tone={ltr !== null && ltr > 0.6 ? "destructive" : "success"}
         />
         <Kpi
-          label="Net Cash Flow"
-          value={idr(cashIn - cashOut)}
-          sub={`In ${idr(cashIn)} · Out ${idr(cashOut)}`}
-          icon={cashIn - cashOut >= 0 ? ArrowUpRight : ArrowDownRight}
-          tone={cashIn - cashOut >= 0 ? "success" : "destructive"}
+          label="Net Cash Flow (Operating)"
+          value={idr(netOperating)}
+          sub={`In ${idr(m?.op_cash_in)} · Out ${idr(m?.op_cash_out)}`}
+          icon={netOperating >= 0 ? ArrowUpRight : ArrowDownRight}
+          tone={netOperating >= 0 ? "success" : "destructive"}
+        />
+        <Kpi
+          label="Financing (Investor)"
+          value={idr(netFinancing)}
+          sub={`Loans in ${idr(m?.financing_in)} · Repaid ${idr(m?.financing_out)} · not in profit or operating cash`}
+          icon={Landmark}
+        />
+        <Kpi
+          label="Pipeline Value"
+          value={idr(m?.pipeline_value)}
+          sub="Estimated selling of Pipeline and Active jobs · not revenue"
+          icon={TrendingUp}
         />
       </div>
 
@@ -198,16 +191,16 @@ function Dashboard() {
             <div>
               <div className="mb-1 flex justify-between text-sm">
                 <span className="text-muted-foreground">Receipts vs invoiced</span>
-                <span>{pct(revenue > 0 ? arReceipts / revenue : 0)}</span>
+                <span>{pct(revenue > 0 ? num(m?.ar_received) / revenue : null)}</span>
               </div>
-              <Progress value={revenue > 0 ? (arReceipts / revenue) * 100 : 0} />
+              <Progress value={revenue > 0 ? (num(m?.ar_received) / revenue) * 100 : 0} />
             </div>
             <div>
               <div className="mb-1 flex justify-between text-sm">
                 <span className="text-muted-foreground">Vendor payments vs billed</span>
-                <span>{pct(payable > 0 ? apPayments / payable : 0)}</span>
+                <span>{pct(cost > 0 ? num(m?.ap_paid) / cost : null)}</span>
               </div>
-              <Progress value={payable > 0 ? (apPayments / payable) * 100 : 0} />
+              <Progress value={cost > 0 ? (num(m?.ap_paid) / cost) * 100 : 0} />
             </div>
           </CardContent>
         </Card>
@@ -232,10 +225,10 @@ function Dashboard() {
                 <TableBody>
                   {overdueAr.slice(0, 6).map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell className="font-medium">{r.invoice_no}</TableCell>
-                      <TableCell>{r.customers?.company_name ?? "-"}</TableCell>
+                      <TableCell className="font-medium">{r.reference}</TableCell>
+                      <TableCell>{r.party ?? "-"}</TableCell>
                       <TableCell>{fmtDate(r.due_date)}</TableCell>
-                      <TableCell className="text-right">{idr(r.remaining_amount)}</TableCell>
+                      <TableCell className="text-right">{idr(r.balance)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -266,15 +259,15 @@ function Dashboard() {
                 {upcomingAp.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">
-                      {r.subcontractors_vendors?.vendor_name ?? "-"}
+                      {r.party ?? "-"}
                     </TableCell>
                     <TableCell>{fmtDate(r.due_date)}</TableCell>
                     <TableCell>
                       <StatusBadge
-                        status={isOverdue(r.due_date, num(r.balance_remaining)) ? "Overdue" : r.status}
+                        status={num(r.days_overdue) > 0 ? "Overdue" : r.bucket}
                       />
                     </TableCell>
-                    <TableCell className="text-right">{idr(r.balance_remaining)}</TableCell>
+                    <TableCell className="text-right">{idr(r.balance)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
