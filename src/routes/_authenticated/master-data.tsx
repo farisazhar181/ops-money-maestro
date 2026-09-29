@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/master-data")({
 
 function MasterData() {
   const qc = useQueryClient();
-  const { canEditJobs } = useRoles();
+  const { canEditMasterData: canEditJobs } = useRoles();
   const [custOpen, setCustOpen] = useState(false);
   const [vendOpen, setVendOpen] = useState(false);
   const [cust, setCust] = useState({ company_name: "", contact_name: "", phone: "", email: "", address: "" });

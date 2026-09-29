@@ -60,6 +60,8 @@ export function useRoles() {
     canEditJobs: roles.includes("owner") || roles.includes("operations"),
     canEditFinance: roles.includes("owner") || roles.includes("finance"),
     canManageUsers: roles.includes("owner") || roles.includes("finance"),
+    canEditMasterData: roles.includes("owner") || roles.includes("finance") || roles.includes("operations"),
+    canManageOverhead: roles.includes("finance"),
     primaryRole: roles.includes("owner") ? "owner" : roles[0],
   };
 }
