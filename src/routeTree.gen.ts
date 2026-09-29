@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedMasterDataRouteImport } from './routes/_authenticated/master-data'
+import { Route as AuthenticatedOverheadRouteImport } from './routes/_authenticated/overhead'
 import { Route as AuthenticatedPayablesRouteImport } from './routes/_authenticated/payables'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedReceivablesRouteImport } from './routes/_authenticated/receivables'
@@ -49,6 +50,11 @@ const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
 const AuthenticatedMasterDataRoute = AuthenticatedMasterDataRouteImport.update({
   id: '/master-data',
   path: '/master-data',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOverheadRoute = AuthenticatedOverheadRouteImport.update({
+  id: '/overhead',
+  path: '/overhead',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPayablesRoute = AuthenticatedPayablesRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/master-data': typeof AuthenticatedMasterDataRoute
+  '/overhead': typeof AuthenticatedOverheadRoute
   '/payables': typeof AuthenticatedPayablesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/receivables': typeof AuthenticatedReceivablesRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/master-data': typeof AuthenticatedMasterDataRoute
+  '/overhead': typeof AuthenticatedOverheadRoute
   '/payables': typeof AuthenticatedPayablesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/receivables': typeof AuthenticatedReceivablesRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/_authenticated/master-data': typeof AuthenticatedMasterDataRoute
+  '/_authenticated/overhead': typeof AuthenticatedOverheadRoute
   '/_authenticated/payables': typeof AuthenticatedPayablesRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/receivables': typeof AuthenticatedReceivablesRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/jobs'
     | '/master-data'
+    | '/overhead'
     | '/payables'
     | '/payments'
     | '/receivables'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/jobs'
     | '/master-data'
+    | '/overhead'
     | '/payables'
     | '/payments'
     | '/receivables'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/jobs'
     | '/_authenticated/master-data'
+    | '/_authenticated/overhead'
     | '/_authenticated/payables'
     | '/_authenticated/payments'
     | '/_authenticated/receivables'
@@ -215,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/master-data'
       fullPath: '/master-data'
       preLoaderRoute: typeof AuthenticatedMasterDataRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/overhead': {
+      id: '/_authenticated/overhead'
+      path: '/overhead'
+      fullPath: '/overhead'
+      preLoaderRoute: typeof AuthenticatedOverheadRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/payables': {
@@ -277,6 +296,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRouteWithChildren
   AuthenticatedMasterDataRoute: typeof AuthenticatedMasterDataRoute
+  AuthenticatedOverheadRoute: typeof AuthenticatedOverheadRoute
   AuthenticatedPayablesRoute: typeof AuthenticatedPayablesRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedReceivablesRoute: typeof AuthenticatedReceivablesRoute
@@ -288,6 +308,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRouteWithChildren,
   AuthenticatedMasterDataRoute: AuthenticatedMasterDataRoute,
+  AuthenticatedOverheadRoute: AuthenticatedOverheadRoute,
   AuthenticatedPayablesRoute: AuthenticatedPayablesRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedReceivablesRoute: AuthenticatedReceivablesRoute,
