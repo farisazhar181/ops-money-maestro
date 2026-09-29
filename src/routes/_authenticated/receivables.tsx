@@ -18,6 +18,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
+import { paymentDateError } from "@/lib/finance-rules";
 import { useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/receivables")({
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/_authenticated/receivables")({
 function ReceivablesPage() {
   const qc = useQueryClient();
   const { canEditFinance } = useRoles();
-  const [payFor, setPayFor] = useState<{ id: string; invoice_no: string; balance: number } | null>(null);
+  const [payFor, setPayFor] = useState<{ id: string; invoice_no: string; balance: number; minDate: string } | null>(null);
   const [pay, setPay] = useState({ amount: "", date: today() });
 
   const { data: rows } = useQuery({
@@ -56,6 +57,8 @@ function ReceivablesPage() {
   const record = useMutation({
     mutationFn: async () => {
       if (!payFor) return;
+      const dateErr = paymentDateError(pay.date, payFor.minDate);
+      if (dateErr) throw new Error(dateErr);
       const { error } = await supabase.rpc("record_ar_payment", {
         _ar_id: payFor.id,
         _payment_date: pay.date,
@@ -75,7 +78,8 @@ function ReceivablesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const list = rows ?? [];
+  const allRows = rows ?? [];
+  const list = allRows.filter((r) => !r.is_void);
   const outstanding = list.reduce((s, r) => s + num(r.remaining_amount), 0);
   const overdue = list.filter((r) => isOverdue(r.due_date, num(r.remaining_amount)));
 
@@ -141,7 +145,7 @@ function ReceivablesPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setPayFor({ id: r.id, invoice_no: r.invoice_no, balance: bal })}
+                          onClick={() => setPayFor({ id: r.id, invoice_no: r.invoice_no, balance: bal, minDate: r.invoice_date })}
                         >
                           <Banknote className="mr-1 h-4 w-4" /> Record payment
                         </Button>
@@ -173,8 +177,8 @@ function ReceivablesPage() {
               <Input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label>Date</Label>
-              <Input type="date" value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
+              <Label>Date (not before {fmtDate(payFor?.minDate)})</Label>
+              <Input type="date" min={payFor?.minDate} value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
             </div>
           </div>
           <DialogFooter>
