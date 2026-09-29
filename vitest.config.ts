@@ -7,6 +7,8 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     testTimeout: 30000,
+    // Integration files share live totals; run them one at a time.
+    fileParallelism: false,
     hookTimeout: 60000,
   },
 });
