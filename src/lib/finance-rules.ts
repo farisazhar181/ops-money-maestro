@@ -18,3 +18,20 @@ export function paymentDateError(paymentDate: string, documentDate: string | nul
   }
   return null;
 }
+
+export type CashFlowType = "AR_RECEIPT" | "AP_PAYMENT" | "OPERATIONAL_EXPENSE";
+
+/** Every operating cash-flow type is classified explicitly; investor money is financing and never appears here. */
+export function cashFlowDirection(type: CashFlowType): "in" | "out" {
+  switch (type) {
+    case "AR_RECEIPT":
+      return "in";
+    case "AP_PAYMENT":
+    case "OPERATIONAL_EXPENSE":
+      return "out";
+  }
+}
+
+export function cashFlowLabel(type: CashFlowType): string {
+  return { AR_RECEIPT: "Customer receipt", AP_PAYMENT: "Vendor payment", OPERATIONAL_EXPENSE: "Overhead payment" }[type];
+}
