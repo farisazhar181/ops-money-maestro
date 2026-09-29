@@ -247,6 +247,43 @@ describe.skipIf(!enabled)("database rules", () => {
     const aging = await finance.rpc("report_aging", { _kind: "ap" });
     expect((aging.data ?? []).some((r) => r.id === ap.data!.id)).toBe(false);
   });
+  it("statistics views: Operations blocked; month-end balances, rankings and 24-month range match reports", async () => {
+    for (const call of [
+      ops.rpc("report_balances", { _from: today, _to: today }),
+      ops.rpc("report_top_parties", { _kind: "customers", _from: today, _to: today, _limit: 5 }),
+    ]) expect((await call).error?.message).toMatch(/Not authorized/);
+
+    const from = `${today.slice(0, 8)}01`;
+    const b0 = (await finance.rpc("report_balances", { _from: today, _to: today })).data![0]!;
+    const v0 = (await finance.rpc("report_top_parties", { _kind: "vendors", _from: from, _to: today, _limit: 50 })).data!;
+    const job = await owner.from("jobs").select("id").eq("is_void", false).limit(1).single();
+    const vendor = await finance.rpc("save_vendor", { _id: null as unknown as string, _vendor_name: `TEST stats ${Date.now()}`, _service_type: "", _contact_person: "", _phone: "" });
+    const ap = await finance.rpc("create_ap", { _job_id: job.data!.id, _vendor_id: vendor.data!.id, _description: "TEST stats", _amount: 999999999, _bill_date: today, _terms: 0 });
+    expect(ap.error).toBeNull();
+    const b1 = (await finance.rpc("report_balances", { _from: today, _to: today })).data![0]!;
+    expect(num(b1.ap_outstanding) - num(b0.ap_outstanding)).toBe(999999999);
+    const top = (await finance.rpc("report_top_parties", { _kind: "vendors", _from: from, _to: today, _limit: 5 })).data!;
+    expect(top[0]!.party).toBe(vendor.data!.vendor_name);
+    expect(num(top[0]!.total)).toBe(999999999);
+    expect((await finance.rpc("void_ap", { _id: ap.data!.id, _reason: "TEST cleanup" })).error).toBeNull();
+    const b2 = (await finance.rpc("report_balances", { _from: today, _to: today })).data![0]!;
+    expect(num(b2.ap_outstanding)).toBe(num(b0.ap_outstanding));
+    const v2 = (await finance.rpc("report_top_parties", { _kind: "vendors", _from: from, _to: today, _limit: 50 })).data!;
+    expect(v2.map((r) => r.party)).toEqual(v0.map((r) => r.party));
+
+    // Month-end AR outstanding today equals the AR aging total (same definition)
+    const arAging = (await finance.rpc("report_aging", { _kind: "ar" })).data ?? [];
+    expect(num(b2.ar_outstanding)).toBe(arAging.reduce((s, r) => s + num(r.balance), 0));
+    // Top customers over the month sum to at most that month's revenue
+    const cust = (await finance.rpc("report_top_parties", { _kind: "customers", _from: from, _to: today, _limit: 1000 })).data!;
+    expect(cust.reduce((s, r) => s + num(r.total), 0)).toBe(num((await month()).revenue));
+    // 24-month range returns 24 rows from both monthly views
+    const f24 = new Date(Date.UTC(+today.slice(0, 4), +today.slice(5, 7) - 24, 1)).toISOString().slice(0, 10);
+    expect((await finance.rpc("report_monthly", { _from: f24, _to: today })).data!.length).toBe(24);
+    expect((await finance.rpc("report_balances", { _from: f24, _to: today })).data!.length).toBe(24);
+    await owner.from("subcontractors_vendors").delete().eq("id", vendor.data!.id);
+  });
+
 });
 
 function num(v: number | string | null | undefined) {
