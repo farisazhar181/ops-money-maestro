@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
-import { idr, fmtDate, today, num } from "@/lib/format";
+import { idr, fmtDate, today, numOrNull } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/jobs")({
@@ -83,29 +83,21 @@ function JobsPage() {
 
   const create = useMutation({
     mutationFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const { data: created, error } = await supabase.from("jobs").insert({
-        job_sheet_no: form.job_sheet_no,
-        customer_id: form.customer_id || null,
-        order_date: form.order_date,
-        service_type: form.service_type,
-        unit_type: form.unit_type,
-        quantity: form.quantity,
-        volume_weight: form.volume_weight,
-        origin: form.origin,
-        destination: form.destination,
-        status: "Pipeline",
-        created_by: userRes.user?.id ?? null,
-      }).select("id").single();
+      const { error } = await supabase.rpc("create_job", {
+        _job_sheet_no: form.job_sheet_no,
+        _customer_id: form.customer_id || (null as unknown as string),
+        _order_date: form.order_date,
+        _service_type: form.service_type,
+        _unit_type: form.unit_type,
+        _quantity: form.quantity,
+        _volume_weight: form.volume_weight,
+        _origin: form.origin,
+        _destination: form.destination,
+        ...(canEditFinance
+          ? { _estimated_selling: numOrNull(form.selling_price) ?? 0, _estimated_buying: numOrNull(form.buying_price_est) ?? 0 }
+          : {}),
+      });
       if (error) throw error;
-      if (canEditFinance && created) {
-        const { error: financeError } = await supabase.from("job_financials").insert({
-          job_id: created.id,
-          estimated_selling: num(form.selling_price),
-          estimated_buying: num(form.buying_price_est),
-        });
-        if (financeError) throw financeError;
-      }
     },
     onSuccess: () => {
       toast.success("Job sheet created");
@@ -210,7 +202,7 @@ function JobsPage() {
               {rows.map((j) => (
                  <TableRow
                    key={j.id}
-                   className="cursor-pointer"
+                   className={j.is_void ? "cursor-pointer opacity-50" : "cursor-pointer"}
                    tabIndex={0}
                    onClick={() => navigate({ to: "/jobs/$jobId", params: { jobId: j.id } })}
                    onKeyDown={(event) => {
@@ -226,7 +218,7 @@ function JobsPage() {
                   <TableCell className="text-right">{j.job_financials ? idr(j.job_financials.estimated_selling) : "—"}</TableCell>
                   <TableCell className="text-right">{j.job_financials ? idr(j.job_financials.estimated_buying) : "—"}</TableCell>
                   <TableCell>
-                    <StatusBadge status={j.status} />
+                    <StatusBadge status={j.is_void ? "Voided" : j.status} />
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">Open</TableCell>
                 </TableRow>

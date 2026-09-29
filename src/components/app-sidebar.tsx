@@ -10,6 +10,7 @@ import {
   Settings,
   Ship,
   Coins,
+  Landmark,
 } from "lucide-react";
 import {
   Sidebar,
@@ -49,6 +50,7 @@ export function AppSidebar() {
     ...(canSeeExecutive
       ? [
           { title: "Overhead Costs", url: "/overhead", icon: Coins },
+          { title: "Investor Transactions", url: "/investors", icon: Landmark },
           { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
         ]
       : []),
