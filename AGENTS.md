@@ -12,3 +12,5 @@
 - Cash-flow rows are created only by payment functions (AP, AR, `pay_overhead`); clients cannot insert them. Why: prevents a cost being counted twice.
 - Business dates use Asia/Jakarta via `today()`/`jakartaDate()` in `src/lib/format.ts` and `private.jkt_today()` in SQL. Why: due dates and months must not shift at UTC midnight.
 - Tests: `bunx vitest run`; database tests need TEST_OWNER_TOKEN, TEST_FINANCE_EMAIL, TEST_OPS_EMAIL, TEST_PASSWORD and otherwise skip.
+
+- Clients never INSERT/UPDATE business tables directly; every write goes through a `public.*` wrapper calling a `private.*_impl` function. Why: validation and activity logging can't be bypassed.
