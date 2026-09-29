@@ -132,7 +132,7 @@ function PayablesPage() {
                     <TableCell className="text-right">{idr(r.paid_amount)}</TableCell>
                     <TableCell className="text-right font-medium">{idr(bal)}</TableCell>
                     <TableCell>
-                      <StatusBadge status={late ? "Overdue" : r.status} />
+                      <StatusBadge status={r.is_void ? "Voided" : late ? "Overdue" : r.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       {canEditFinance && bal > 0 && !r.is_void && (
