@@ -94,7 +94,7 @@ function JobsPage() {
         volume_weight: form.volume_weight,
         origin: form.origin,
         destination: form.destination,
-        status: "Draft",
+        status: "Pipeline",
         created_by: userRes.user?.id ?? null,
       }).select("id").single();
       if (error) throw error;
@@ -134,10 +134,9 @@ function JobsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="Draft">Draft</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="Completed">Completed</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
+              <SelectItem value="Pipeline">Pipeline</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
             </SelectContent>
           </Select>
           {canEditJobs && (
