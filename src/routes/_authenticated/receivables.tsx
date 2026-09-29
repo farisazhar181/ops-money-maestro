@@ -15,7 +15,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { idr, num, fmtDate, today, isOverdue, daysUntil } from "@/lib/format";
 import { paymentDateError } from "@/lib/finance-rules";
@@ -29,7 +36,8 @@ export const Route = createFileRoute("/_authenticated/receivables")({
       { title: "Accounts Receivable | Loka Logistics ERP" },
       {
         name: "description",
-        content: "Customer invoice aging tracker with overdue badges and payment receipts recording.",
+        content:
+          "Customer invoice aging tracker with overdue badges and payment receipts recording.",
       },
       { property: "og:title", content: "Accounts Receivable | Loka Logistics ERP" },
       { property: "og:description", content: "Track outstanding customer invoices and receipts." },
@@ -41,12 +49,18 @@ export const Route = createFileRoute("/_authenticated/receivables")({
 function ReceivablesPage() {
   const qc = useQueryClient();
   const { canEditFinance } = useRoles();
-  const [payFor, setPayFor] = useState<{ id: string; invoice_no: string; balance: number; minDate: string } | null>(null);
+  const [payFor, setPayFor] = useState<{
+    id: string;
+    invoice_no: string;
+    balance: number;
+    minDate: string;
+  } | null>(null);
   const [pay, setPay] = useState({ amount: "", date: today() });
   const [editRow, setEditRow] = useState<ArRow | null>(null);
   const [voidId, setVoidId] = useState<string | null>(null);
   const refresh = () => {
-    for (const k of ["ar", "dashboard", "payments", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+    for (const k of ["ar", "dashboard", "payments", "reports"])
+      qc.invalidateQueries({ queryKey: [k] });
   };
 
   const { data: rows } = useQuery({
@@ -95,14 +109,17 @@ function ReceivablesPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold">Accounts Receivable</h1>
         <p className="text-sm text-muted-foreground">
-          {list.length} invoices &middot; {idr(outstanding)} outstanding &middot; {overdue.length} overdue
+          {list.length} invoices &middot; {idr(outstanding)} outstanding &middot; {overdue.length}{" "}
+          overdue
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Schedule of AR / aging tracker</CardTitle>
-          <CardDescription>Overdue invoices are flagged automatically against today's date.</CardDescription>
+          <CardDescription>
+            Overdue invoices are flagged automatically against today's date.
+          </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -127,16 +144,28 @@ function ReceivablesPage() {
                 const late = isOverdue(r.due_date, bal);
                 const d = daysUntil(r.due_date);
                 return (
-                  <TableRow key={r.id} className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined}>
-                    <TableCell className="font-medium">{r.invoice_no}{r.is_void && <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />}</TableCell>
+                  <TableRow
+                    key={r.id}
+                    className={r.is_void ? "opacity-50" : late ? "bg-destructive/5" : undefined}
+                  >
+                    <TableCell className="font-medium">
+                      {r.invoice_no}
+                      {r.is_void && (
+                        <VoidedNote at={r.voided_at} by={r.voided_by} reason={r.void_reason} />
+                      )}
+                    </TableCell>
                     <TableCell>{r.customers?.company_name ?? "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">{r.jobs?.job_sheet_no ?? "-"}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {r.jobs?.job_sheet_no ?? "-"}
+                    </TableCell>
                     <TableCell>{fmtDate(r.invoice_date)}</TableCell>
                     <TableCell>{r.payment_terms_days}d</TableCell>
                     <TableCell>
                       {fmtDate(r.due_date)}
                       {bal > 0 && (
-                        <span className={`ml-2 text-xs ${late ? "text-destructive" : "text-muted-foreground"}`}>
+                        <span
+                          className={`ml-2 text-xs ${late ? "text-destructive" : "text-muted-foreground"}`}
+                        >
                           {late ? `${Math.abs(d)}d late` : `in ${d}d`}
                         </span>
                       )}
@@ -150,15 +179,36 @@ function ReceivablesPage() {
                     <TableCell className="whitespace-nowrap text-right">
                       {canEditFinance && !r.is_void && (
                         <>
-                          <Button size="icon" variant="ghost" title="Edit" onClick={() => setEditRow(r)}><Pencil className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(r.id)}><Ban className="h-4 w-4" /></Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Edit"
+                            onClick={() => setEditRow(r)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Void"
+                            onClick={() => setVoidId(r.id)}
+                          >
+                            <Ban className="h-4 w-4" />
+                          </Button>
                         </>
                       )}
                       {canEditFinance && bal > 0 && !r.is_void && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setPayFor({ id: r.id, invoice_no: r.invoice_no, balance: bal, minDate: r.invoice_date })}
+                          onClick={() =>
+                            setPayFor({
+                              id: r.id,
+                              invoice_no: r.invoice_no,
+                              balance: bal,
+                              minDate: r.invoice_date,
+                            })
+                          }
                         >
                           <Banknote className="mr-1 h-4 w-4" /> Record payment
                         </Button>
@@ -199,11 +249,20 @@ function ReceivablesPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Amount (balance {idr(payFor?.balance ?? 0)})</Label>
-              <Input type="number" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
+              <Input
+                type="number"
+                value={pay.amount}
+                onChange={(e) => setPay({ ...pay, amount: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Date (not before {fmtDate(payFor?.minDate)})</Label>
-              <Input type="date" min={payFor?.minDate} value={pay.date} onChange={(e) => setPay({ ...pay, date: e.target.value })} />
+              <Input
+                type="date"
+                min={payFor?.minDate}
+                value={pay.date}
+                onChange={(e) => setPay({ ...pay, date: e.target.value })}
+              />
             </div>
           </div>
           <DialogFooter>

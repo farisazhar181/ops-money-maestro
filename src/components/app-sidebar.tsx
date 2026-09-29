@@ -11,6 +11,7 @@ import {
   Ship,
   Coins,
   Landmark,
+  LineChart as LineChartIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -52,6 +53,7 @@ export function AppSidebar() {
           { title: "Overhead Costs", url: "/overhead", icon: Coins },
           { title: "Investor Transactions", url: "/investors", icon: Landmark },
           { title: "Reports", url: "/reports", icon: ChartNoAxesCombined },
+          { title: "Statistics", url: "/statistics", icon: LineChartIcon },
         ]
       : []),
   ];
@@ -97,23 +99,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {administrationItems.length > 0 && <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {administrationItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>}
+        {administrationItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {administrationItems.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                      <Link to={item.url} className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );

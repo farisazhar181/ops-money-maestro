@@ -4,8 +4,21 @@ import { ShieldAlert, UserX } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate } from "@/lib/format";
@@ -20,7 +33,10 @@ export const Route = createFileRoute("/_authenticated/settings")({
         content: "Manage staff accounts and assign Owner, Finance or Operations roles.",
       },
       { property: "og:title", content: "User Settings | Loka Logistics ERP" },
-      { property: "og:description", content: "Role-based access management for Loka Logistics staff." },
+      {
+        property: "og:description",
+        content: "Role-based access management for Loka Logistics staff.",
+      },
     ],
   }),
   component: SettingsPage,
@@ -94,7 +110,9 @@ function SettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold">User Settings</h1>
-        <p className="text-sm text-muted-foreground">Activate pending staff or revoke access immediately.</p>
+        <p className="text-sm text-muted-foreground">
+          Activate pending staff or revoke access immediately.
+        </p>
       </div>
 
       <Card>
@@ -123,7 +141,10 @@ function SettingsPage() {
                   <TableCell>{u.email}</TableCell>
                   <TableCell>{fmtDate(u.created_at)}</TableCell>
                   <TableCell>
-                    <Badge variant={u.status === "deactivated" ? "destructive" : "secondary"} className="capitalize">
+                    <Badge
+                      variant={u.status === "deactivated" ? "destructive" : "secondary"}
+                      className="capitalize"
+                    >
                       {u.status === "active" ? (u.role ?? "pending") : u.status}
                     </Badge>
                   </TableCell>
@@ -144,11 +165,19 @@ function SettingsPage() {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
-                    {u.id !== user?.id && u.status !== "deactivated" && !(isFinance && u.role === "owner") && (
-                      <Button variant="ghost" size="icon" title="Deactivate user" onClick={() => deactivate.mutate(u.id)} disabled={deactivate.isPending}>
-                        <UserX className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
+                    {u.id !== user?.id &&
+                      u.status !== "deactivated" &&
+                      !(isFinance && u.role === "owner") && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Deactivate user"
+                          onClick={() => deactivate.mutate(u.id)}
+                          disabled={deactivate.isPending}
+                        >
+                          <UserX className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                   </TableCell>
                 </TableRow>
               ))}

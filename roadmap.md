@@ -17,7 +17,7 @@
 - [x] Liabilities to Revenue Ratio; payment date rule; Jakarta dates
 - [x] Finance edits master data; referenced records undeletable
 - [x] Owner audit coverage; tests; lint + build
-- [ ] Statistics page (next batch)
+- [x] Statistics page (6/12/24M, DB views, tests)
 - [x] Investor Transactions page
 
 ## Batch B — interface + validated writes (Sep 29)

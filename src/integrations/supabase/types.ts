@@ -1243,6 +1243,14 @@ export type Database = {
           reference: string
         }[]
       }
+      report_balances: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          ap_outstanding: number
+          ar_outstanding: number
+          month: string
+        }[]
+      }
       report_monthly: {
         Args: { _from: string; _to: string }
         Returns: {
@@ -1283,6 +1291,13 @@ export type Database = {
           overhead: number
           pipeline_value: number
           revenue: number
+        }[]
+      }
+      report_top_parties: {
+        Args: { _from: string; _kind: string; _limit?: number; _to: string }
+        Returns: {
+          party: string
+          total: number
         }[]
       }
       save_customer: {
