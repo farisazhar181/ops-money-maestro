@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           attachment_path: string | null
           balance_remaining: number | null
+          bill_date: string
           created_at: string
           due_date: string | null
           id: string
@@ -38,6 +39,7 @@ export type Database = {
         Insert: {
           attachment_path?: string | null
           balance_remaining?: number | null
+          bill_date?: string
           created_at?: string
           due_date?: string | null
           id?: string
@@ -58,6 +60,7 @@ export type Database = {
         Update: {
           attachment_path?: string | null
           balance_remaining?: number | null
+          bill_date?: string
           created_at?: string
           due_date?: string | null
           id?: string
@@ -457,8 +460,8 @@ export type Database = {
       }
       job_financials: {
         Row: {
-          actual_buying: number
-          actual_selling: number
+          actual_buying: number | null
+          actual_selling: number | null
           estimated_buying: number
           estimated_selling: number
           job_id: string
@@ -467,8 +470,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          actual_buying?: number
-          actual_selling?: number
+          actual_buying?: number | null
+          actual_selling?: number | null
           estimated_buying?: number
           estimated_selling?: number
           job_id: string
@@ -477,8 +480,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          actual_buying?: number
-          actual_selling?: number
+          actual_buying?: number | null
+          actual_selling?: number | null
           estimated_buying?: number
           estimated_selling?: number
           job_id?: string
@@ -498,6 +501,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          closed_at: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
@@ -518,6 +522,7 @@ export type Database = {
           volume_weight: string | null
         }
         Insert: {
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -538,6 +543,7 @@ export type Database = {
           volume_weight?: string | null
         }
         Update: {
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -584,6 +590,7 @@ export type Database = {
           id: string
           is_void: boolean
           note: string
+          payment_transaction_id: string | null
           updated_at: string
           void_reason: string | null
           voided_at: string | null
@@ -598,6 +605,7 @@ export type Database = {
           id?: string
           is_void?: boolean
           note: string
+          payment_transaction_id?: string | null
           updated_at?: string
           void_reason?: string | null
           voided_at?: string | null
@@ -612,6 +620,7 @@ export type Database = {
           id?: string
           is_void?: boolean
           note?: string
+          payment_transaction_id?: string | null
           updated_at?: string
           void_reason?: string | null
           voided_at?: string | null
@@ -623,6 +632,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overhead_costs_payment_transaction_id_fkey"
+            columns: ["payment_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
             referencedColumns: ["id"]
           },
           {
@@ -790,6 +806,7 @@ export type Database = {
       edit_ap: {
         Args: {
           _amount: number
+          _bill_date?: string
           _description: string
           _due_date: string
           _id: string
@@ -799,6 +816,7 @@ export type Database = {
         Returns: {
           attachment_path: string | null
           balance_remaining: number | null
+          bill_date: string
           created_at: string
           due_date: string | null
           id: string
@@ -937,6 +955,35 @@ export type Database = {
           id: string
           is_void: boolean
           note: string
+          payment_transaction_id: string | null
+          updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "overhead_costs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pay_overhead: {
+        Args: {
+          _id: string
+          _method?: Database["public"]["Enums"]["payment_method"]
+          _payment_date: string
+        }
+        Returns: {
+          amount: number
+          cost_date: string
+          cost_type: Database["public"]["Enums"]["overhead_type"]
+          created_at: string
+          created_by: string
+          id: string
+          is_void: boolean
+          note: string
+          payment_transaction_id: string | null
           updated_at: string
           void_reason: string | null
           voided_at: string | null
@@ -954,6 +1001,7 @@ export type Database = {
         Returns: {
           attachment_path: string | null
           balance_remaining: number | null
+          bill_date: string
           created_at: string
           due_date: string | null
           id: string
@@ -1007,6 +1055,64 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      report_aging: {
+        Args: { _kind: string }
+        Returns: {
+          amount: number
+          balance: number
+          bucket: string
+          days_overdue: number
+          doc_date: string
+          due_date: string
+          id: string
+          job_sheet_no: string
+          paid: number
+          party: string
+          reference: string
+        }[]
+      }
+      report_monthly: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          closed_buying: number
+          closed_jobs: number
+          closed_margin: number
+          closed_selling: number
+          cost: number
+          financing_in: number
+          financing_out: number
+          jobs_created: number
+          month: string
+          net_profit: number
+          op_cash_in: number
+          op_cash_out: number
+          overhead: number
+          revenue: number
+        }[]
+      }
+      report_summary: {
+        Args: never
+        Returns: {
+          ap_outstanding: number
+          ap_paid: number
+          ar_outstanding: number
+          ar_received: number
+          cost: number
+          financing_in: number
+          financing_out: number
+          jobs_closed: number
+          jobs_total: number
+          liabilities_to_revenue: number
+          net_financing: number
+          net_operating_cash: number
+          net_profit: number
+          op_cash_in: number
+          op_cash_out: number
+          overhead: number
+          pipeline_value: number
+          revenue: number
+        }[]
+      }
       update_job_operations: {
         Args: {
           _customer_id: string
@@ -1020,6 +1126,7 @@ export type Database = {
           _volume_weight: string
         }
         Returns: {
+          closed_at: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
@@ -1051,6 +1158,7 @@ export type Database = {
         Returns: {
           attachment_path: string | null
           balance_remaining: number | null
+          bill_date: string
           created_at: string
           due_date: string | null
           id: string
@@ -1155,6 +1263,7 @@ export type Database = {
       void_job: {
         Args: { _job_id: string; _reason: string }
         Returns: {
+          closed_at: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
@@ -1192,6 +1301,7 @@ export type Database = {
           id: string
           is_void: boolean
           note: string
+          payment_transaction_id: string | null
           updated_at: string
           void_reason: string | null
           voided_at: string | null
