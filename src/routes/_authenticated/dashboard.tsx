@@ -146,7 +146,7 @@ function Dashboard() {
       <div>
         <h1 className="font-display text-2xl font-semibold">Executive Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          {jobs.length} job sheets &middot; {jobs.filter((j) => j.status === "Completed").length} completed
+          {jobs.length} job sheets &middot; {jobs.filter((j) => j.status === "Closed").length} closed
         </p>
       </div>
 
