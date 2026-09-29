@@ -182,7 +182,7 @@ function JobsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Pipeline ({rows.length})</CardTitle>
+          <CardTitle className="text-base">{filter === "all" ? "All job sheets" : filter} ({rows.length})</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedInvestorsRouteImport } from './routes/_authenticated/investors'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedMasterDataRouteImport } from './routes/_authenticated/master-data'
 import { Route as AuthenticatedOverheadRouteImport } from './routes/_authenticated/overhead'
@@ -40,6 +41,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvestorsRoute = AuthenticatedInvestorsRouteImport.update({
+  id: '/investors',
+  path: '/investors',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/investors': typeof AuthenticatedInvestorsRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/master-data': typeof AuthenticatedMasterDataRoute
   '/overhead': typeof AuthenticatedOverheadRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/investors': typeof AuthenticatedInvestorsRoute
   '/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/master-data': typeof AuthenticatedMasterDataRoute
   '/overhead': typeof AuthenticatedOverheadRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/investors': typeof AuthenticatedInvestorsRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRouteWithChildren
   '/_authenticated/master-data': typeof AuthenticatedMasterDataRoute
   '/_authenticated/overhead': typeof AuthenticatedOverheadRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/investors'
     | '/jobs'
     | '/master-data'
     | '/overhead'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/investors'
     | '/jobs'
     | '/master-data'
     | '/overhead'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/investors'
     | '/_authenticated/jobs'
     | '/_authenticated/master-data'
     | '/_authenticated/overhead'
@@ -213,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/investors': {
+      id: '/_authenticated/investors'
+      path: '/investors'
+      fullPath: '/investors'
+      preLoaderRoute: typeof AuthenticatedInvestorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/jobs': {
@@ -294,6 +313,7 @@ const AuthenticatedJobsRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedInvestorsRoute: typeof AuthenticatedInvestorsRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRouteWithChildren
   AuthenticatedMasterDataRoute: typeof AuthenticatedMasterDataRoute
   AuthenticatedOverheadRoute: typeof AuthenticatedOverheadRoute
@@ -306,6 +326,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedInvestorsRoute: AuthenticatedInvestorsRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRouteWithChildren,
   AuthenticatedMasterDataRoute: AuthenticatedMasterDataRoute,
   AuthenticatedOverheadRoute: AuthenticatedOverheadRoute,
