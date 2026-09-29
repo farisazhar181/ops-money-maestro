@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowDownRight, ArrowUpRight, Ban, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormField, VoidDialog, VoidedNote } from "@/components/record-actions";
+import { numOrNull } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -38,7 +46,30 @@ export const Route = createFileRoute("/_authenticated/payments")({
 });
 
 function PaymentsPage() {
-  const { canSeeExecutive } = useRoles();
+  const { canSeeExecutive, canEditFinance } = useRoles();
+  const qc = useQueryClient();
+  const [editTx, setEditTx] = useState<{ id: string; date: string; amount: string; method: string; notes: string } | null>(null);
+  const [voidId, setVoidId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const refresh = () => {
+    for (const k of ["payments", "ap", "ar", "overhead", "dashboard", "reports"]) qc.invalidateQueries({ queryKey: [k] });
+  };
+  const saveEdit = async () => {
+    if (!editTx) return;
+    setSaving(true);
+    const { error } = await supabase.rpc("edit_cash_transaction", {
+      _id: editTx.id,
+      _date: editTx.date,
+      _amount: numOrNull(editTx.amount) ?? 0,
+      _method: editTx.method as "Bank Transfer" | "Cash" | "Giro",
+      _notes: editTx.notes,
+    });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Transaction corrected");
+    setEditTx(null);
+    refresh();
+  };
 
   const { data } = useQuery({
     queryKey: ["payments"],
@@ -114,6 +145,7 @@ function PaymentsPage() {
                 <TableHead>Method</TableHead>
                 <TableHead>Notes</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,11 +172,7 @@ function PaymentsPage() {
                     <TableCell>{t.payment_method}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {t.notes}
-                      {t.is_void && (
-                        <span className="block text-xs">
-                          Voided {fmtDate(t.voided_at)}: {t.void_reason}
-                        </span>
-                      )}
+                      {t.is_void && <VoidedNote at={t.voided_at} by={t.voided_by} reason={t.void_reason} />}
                     </TableCell>
                     <TableCell
                       className={`text-right font-medium ${t.is_void ? "line-through" : inbound ? "text-success" : "text-destructive"}`}
@@ -152,12 +180,41 @@ function PaymentsPage() {
                       {inbound ? "+" : "-"}
                       {idr(num(t.amount))}
                     </TableCell>
+                    <TableCell className="whitespace-nowrap text-right">
+                      {canEditFinance && !t.is_void && (
+                        <>
+                          {t.reference_type !== "OPERATIONAL_EXPENSE" ? (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              title="Edit"
+                              onClick={() =>
+                                setEditTx({
+                                  id: t.id,
+                                  date: t.transaction_date,
+                                  amount: String(t.amount),
+                                  method: t.payment_method,
+                                  notes: t.notes ?? "",
+                                })
+                              }
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <span className="mr-2 text-xs text-muted-foreground">Edit on Overhead page</span>
+                          )}
+                          <Button size="icon" variant="ghost" title="Void" onClick={() => setVoidId(t.id)}>
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </TableCell>
                   </TableRow>
                 );
               })}
               {list.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                     No cash movements recorded yet.
                   </TableCell>
                 </TableRow>
@@ -166,6 +223,54 @@ function PaymentsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editTx} onOpenChange={(o) => !o && setEditTx(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit transaction</DialogTitle>
+          </DialogHeader>
+          {editTx && (
+            <div className="space-y-4">
+              <FormField label="Date" type="date" value={editTx.date} onChange={(v) => setEditTx({ ...editTx, date: v })} />
+              <FormField label="Amount (IDR)" type="number" value={editTx.amount} onChange={(v) => setEditTx({ ...editTx, amount: v })} />
+              <div className="space-y-2">
+                <Label>Method</Label>
+                <Select value={editTx.method} onValueChange={(v) => setEditTx({ ...editTx, method: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Bank Transfer", "Cash", "Giro"].map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <FormField label="Notes" value={editTx.notes} onChange={(v) => setEditTx({ ...editTx, notes: v })} />
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={saveEdit} disabled={saving}>
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <VoidDialog
+        open={!!voidId}
+        onOpenChange={(o) => !o && setVoidId(null)}
+        title="Void transaction"
+        description="The linked bill, invoice or overhead balance is restored in the same step. The entry stays visible, marked Voided."
+        onConfirm={async (reason) => {
+          const { error } = await supabase.rpc("void_cash_transaction", { _id: voidId ?? "", _reason: reason });
+          if (error) throw error;
+          toast.success("Transaction voided");
+          refresh();
+        }}
+      />
     </div>
   );
 }
