@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,8 @@ function MasterData() {
   const { canEditMasterData: canEditJobs } = useRoles();
   const [custOpen, setCustOpen] = useState(false);
   const [vendOpen, setVendOpen] = useState(false);
+  const [custId, setCustId] = useState<string | null>(null);
+  const [vendId, setVendId] = useState<string | null>(null);
   const [cust, setCust] = useState({
     company_name: "",
     contact_name: "",
@@ -86,7 +88,7 @@ function MasterData() {
   const addCustomer = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc("save_customer", {
-        _id: null as unknown as string,
+        _id: custId as unknown as string,
         _company_name: cust.company_name,
         _contact_name: cust.contact_name,
         _phone: cust.phone,
@@ -96,7 +98,8 @@ function MasterData() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Customer added");
+      toast.success(custId ? "Customer updated" : "Customer added");
+      setCustId(null);
       setCustOpen(false);
       setCust({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
       qc.invalidateQueries({ queryKey: ["customers-full"] });
@@ -108,7 +111,7 @@ function MasterData() {
   const addVendor = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc("save_vendor", {
-        _id: null as unknown as string,
+        _id: vendId as unknown as string,
         _vendor_name: vend.vendor_name,
         _service_type: vend.service_type,
         _contact_person: vend.contact_person,
@@ -117,7 +120,8 @@ function MasterData() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Vendor added");
+      toast.success(vendId ? "Vendor updated" : "Vendor added");
+      setVendId(null);
       setVendOpen(false);
       setVend({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
       qc.invalidateQueries({ queryKey: ["vendors-full"] });
@@ -146,13 +150,19 @@ function MasterData() {
               {canEditJobs && (
                 <Dialog open={custOpen} onOpenChange={setCustOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setCustId(null);
+                        setCust({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
+                      }}
+                    >
                       <Plus className="mr-2 h-4 w-4" /> Add customer
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>New customer</DialogTitle>
+                      <DialogTitle>{custId ? "Edit customer" : "New customer"}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       {(
@@ -178,7 +188,7 @@ function MasterData() {
                         onClick={() => addCustomer.mutate()}
                         disabled={!cust.company_name || addCustomer.isPending}
                       >
-                        Save customer
+                        {custId ? "Save changes" : "Save customer"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -194,6 +204,7 @@ function MasterData() {
                     <TableHead>Phone</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Address</TableHead>
+                    {canEditJobs && <TableHead className="w-12" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -204,11 +215,33 @@ function MasterData() {
                       <TableCell>{c.phone}</TableCell>
                       <TableCell>{c.email}</TableCell>
                       <TableCell className="text-muted-foreground">{c.address}</TableCell>
+                      {canEditJobs && (
+                        <TableCell>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            aria-label={`Edit ${c.company_name}`}
+                            onClick={() => {
+                              setCustId(c.id);
+                              setCust({
+                                company_name: c.company_name,
+                                contact_name: c.contact_name ?? "",
+                                phone: c.phone ?? "",
+                                email: c.email ?? "",
+                                address: c.address ?? "",
+                              });
+                              setCustOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {(customers.data ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                         No customers yet.
                       </TableCell>
                     </TableRow>
@@ -226,13 +259,19 @@ function MasterData() {
               {canEditJobs && (
                 <Dialog open={vendOpen} onOpenChange={setVendOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setVendId(null);
+                        setVend({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
+                      }}
+                    >
                       <Plus className="mr-2 h-4 w-4" /> Add vendor
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>New vendor</DialogTitle>
+                      <DialogTitle>{vendId ? "Edit vendor" : "New vendor"}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       {(
@@ -257,7 +296,7 @@ function MasterData() {
                         onClick={() => addVendor.mutate()}
                         disabled={!vend.vendor_name || addVendor.isPending}
                       >
-                        Save vendor
+                        {vendId ? "Save changes" : "Save vendor"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -272,6 +311,7 @@ function MasterData() {
                     <TableHead>Service</TableHead>
                     <TableHead>Contact person</TableHead>
                     <TableHead>Phone</TableHead>
+                    {canEditJobs && <TableHead className="w-12" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -281,11 +321,32 @@ function MasterData() {
                       <TableCell>{v.service_type}</TableCell>
                       <TableCell>{v.contact_person}</TableCell>
                       <TableCell>{v.phone}</TableCell>
+                      {canEditJobs && (
+                        <TableCell>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            aria-label={`Edit ${v.vendor_name}`}
+                            onClick={() => {
+                              setVendId(v.id);
+                              setVend({
+                                vendor_name: v.vendor_name,
+                                service_type: v.service_type ?? "",
+                                contact_person: v.contact_person ?? "",
+                                phone: v.phone ?? "",
+                              });
+                              setVendOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {(vendors.data ?? []).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                         No vendors yet.
                       </TableCell>
                     </TableRow>
