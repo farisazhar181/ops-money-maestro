@@ -236,9 +236,27 @@ function JobsPage() {
                     value={form.destination}
                     onChange={(v) => setForm({ ...form, destination: v })}
                   />
+                  <Field
+                    label="Commodity / cargo description"
+                    value={form.commodity}
+                    onChange={(v) => setForm({ ...form, commodity: v })}
+                    placeholder="e.g. Electronics, garments"
+                  />
+                  <Field
+                    label="ETD (est. departure)"
+                    type="date"
+                    value={form.etd}
+                    onChange={(v) => setForm({ ...form, etd: v })}
+                  />
+                  <Field
+                    label="ETA (est. arrival)"
+                    type="date"
+                    value={form.eta}
+                    onChange={(v) => setForm({ ...form, eta: v })}
+                  />
                   {canEditFinance && (
                     <Field
-                      label="Estimated selling (IDR)"
+                      label="Estimated selling (IDR) — required"
                       type="money"
                       value={form.selling_price}
                       onChange={(v) => setForm({ ...form, selling_price: v })}
@@ -246,7 +264,7 @@ function JobsPage() {
                   )}
                   {canEditFinance && (
                     <Field
-                      label="Estimated buying (IDR)"
+                      label="Estimated buying (IDR) — required"
                       type="money"
                       value={form.buying_price_est}
                       onChange={(v) => setForm({ ...form, buying_price_est: v })}
