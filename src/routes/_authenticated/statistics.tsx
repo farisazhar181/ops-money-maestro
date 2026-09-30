@@ -61,6 +61,7 @@ const cfg = {
   receivables: { label: "Receivables", color: "var(--chart-1)" },
   liabilities: { label: "Liabilities", color: "var(--chart-4)" },
   balance: { label: "Balance", color: "var(--chart-3)" },
+  liquidity: { label: "Liquidity Ratio", color: "var(--chart-3)" },
   total: { label: "Total", color: "var(--chart-1)" },
   jobsCreated: { label: "Jobs created", color: "var(--chart-3)" },
   jobsClosed: { label: "Jobs closed", color: "var(--chart-2)" },
@@ -128,6 +129,7 @@ function StatisticsPage() {
     month: monthLabel(r.month),
     receivables: num(r.ar_outstanding),
     liabilities: num(r.ap_outstanding),
+    liquidity: r.liquidity_ratio == null ? null : num(r.liquidity_ratio),
   }));
   const aging = (rows: { bucket: string; balance: number | null }[]) =>
     BUCKETS.map((b) => ({
@@ -251,6 +253,38 @@ function StatisticsPage() {
                 type="monotone"
                 stroke="var(--color-liabilities)"
                 strokeWidth={2}
+              />
+            </LineChart>
+          </ChartCard>
+          <ChartCard
+            title="Liquidity Ratio"
+            desc="(Cash position + receivables) ÷ payables at each month-end"
+          >
+            <LineChart data={balances}>
+              <CartesianGrid vertical={false} />
+              {xAxis}
+              <YAxis
+                tickFormatter={(v) => `${Number(v).toFixed(1)}x`}
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+                width={48}
+              />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(v) => (
+                      <span>Liquidity: {v == null ? "—" : `${Number(v).toFixed(2)}x`}</span>
+                    )}
+                  />
+                }
+              />
+              <Line
+                dataKey="liquidity"
+                type="monotone"
+                stroke="var(--color-liquidity)"
+                strokeWidth={2}
+                connectNulls
               />
             </LineChart>
           </ChartCard>

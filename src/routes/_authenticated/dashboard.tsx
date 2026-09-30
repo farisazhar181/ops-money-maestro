@@ -175,6 +175,14 @@ function Dashboard() {
           tone={ltr !== null && ltr > 0.6 ? "destructive" : "success"}
         />
         <Kpi
+          label="Liquidity Ratio"
+          value={m?.liquidity_ratio == null ? "—" : `${num(m.liquidity_ratio).toFixed(2)}x`}
+          sub={`(Cash ${idr(m?.cash_position)} + receivables ${idr(m?.ar_outstanding)}) ÷ payables ${idr(m?.ap_outstanding)}`}
+          icon={Scale}
+          tone={m?.liquidity_ratio != null && num(m.liquidity_ratio) < 1 ? "destructive" : "success"}
+        />
+
+        <Kpi
           label="Net Cash Flow (Operating)"
           value={idr(netOperating)}
           sub={`In ${idr(m?.op_cash_in)} · Out ${idr(m?.op_cash_out)}`}
