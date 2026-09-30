@@ -17,8 +17,8 @@ export function MoneyInput({
 }: {
   value: string;
   onChange: (raw: string) => void;
-  placeholder?: string;
-  id?: string;
+  placeholder?: string | undefined;
+  id?: string | undefined;
 }) {
   return (
     <Input

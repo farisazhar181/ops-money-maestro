@@ -1167,6 +1167,7 @@ function groupActivity(rows: ActivityRow[]) {
     const last = groups[groups.length - 1];
     const head = last?.[0];
     if (
+      last &&
       head &&
       head.user_id === row.user_id &&
       Math.abs(Date.parse(head.created_at) - Date.parse(row.created_at)) <= 2000
