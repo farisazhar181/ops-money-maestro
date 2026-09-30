@@ -1190,10 +1190,11 @@ function groupActivity(rows: ActivityRow[]) {
     );
     const actions = Array.from(new Set(ordered.map((r) => r.action.replaceAll("_", " "))));
     const descriptions = Array.from(new Set(ordered.map((r) => r.description)));
+    const first = g[0]!;
     return {
-      id: g[0].id,
-      user_id: g[0].user_id,
-      created_at: g[0].created_at,
+      id: first.id,
+      user_id: first.user_id,
+      created_at: first.created_at,
       action: actions.join(", "),
       description: descriptions.join(" · "),
       voided: ordered.some((r) => /void/i.test(r.action)),
