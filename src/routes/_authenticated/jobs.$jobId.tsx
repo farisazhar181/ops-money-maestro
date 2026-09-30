@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MoneyInput } from "@/components/money-input";
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ban, Banknote, Download, FileText, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -36,7 +37,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { daysUntil, fmtDate, idr, idrOrUnset, num, numOrNull, pct, today } from "@/lib/format";
 import { closingError, paymentDateError } from "@/lib/finance-rules";
 import { useRoles } from "@/hooks/use-auth";
-import { ChangeDiff, VoidDialog, VoidedNote, useProfileNames } from "@/components/record-actions";
+import { ChangeList, diffFields, VoidDialog, VoidedNote, useProfileNames } from "@/components/record-actions";
 import { EditApDialog, EditArDialog, type ApRow, type ArRow } from "@/components/finance-dialogs";
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
@@ -398,6 +399,12 @@ function JobDetail() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
+          <Link
+            to="/jobs"
+            className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to Job Sheets
+          </Link>
           <h1 className="font-display text-2xl font-semibold">Job {job.job_sheet_no}</h1>
           <p className="text-sm text-muted-foreground">
             {job.customers?.company_name ?? "No customer"} · {job.origin || "?"} →{" "}
@@ -780,14 +787,14 @@ function JobDetail() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {(activityQuery.data ?? []).map((event) => (
+            {groupActivity(activityQuery.data ?? []).map((event) => (
               <div key={event.id} className="border-l-2 border-border pl-4">
                 <p className="text-sm font-medium">{event.description}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(event.created_at).toLocaleString("en-GB", { timeZone: "Asia/Jakarta" })}{" "}
-                  · {event.action.replaceAll("_", " ")} · {userName(event.user_id)}
+                  · {event.action} · {userName(event.user_id)}
                 </p>
-                <ChangeDiff before={event.old_values} after={event.new_values} />
+                <ChangeList changes={event.changes} voided={event.voided} />
               </div>
             ))}
             {(activityQuery.data ?? []).length === 0 && (
@@ -1141,4 +1148,55 @@ function Field({
       />
     </div>
   );
+}
+
+type ActivityRow = {
+  id: string;
+  user_id: string | null;
+  action: string;
+  description: string;
+  created_at: string;
+  old_values: unknown;
+  new_values: unknown;
+};
+
+/** Merges log rows written by one user action (same user, within 2 seconds) into one event. */
+function groupActivity(rows: ActivityRow[]) {
+  const groups: ActivityRow[][] = [];
+  for (const row of rows) {
+    const last = groups[groups.length - 1];
+    const head = last?.[0];
+    if (
+      head &&
+      head.user_id === row.user_id &&
+      Math.abs(Date.parse(head.created_at) - Date.parse(row.created_at)) <= 2000
+    ) {
+      last.push(row);
+    } else groups.push([row]);
+  }
+  return groups.map((g) => {
+    // rows are newest-first; walk oldest-first so "before" is the earliest and "after" the latest
+    const ordered = [...g].reverse();
+    const merged = new Map<string, { field: string; before: unknown; after: unknown }>();
+    for (const r of ordered) {
+      for (const c of diffFields(r.old_values, r.new_values)) {
+        const prev = merged.get(c.field);
+        merged.set(c.field, { field: c.field, before: prev ? prev.before : c.before, after: c.after });
+      }
+    }
+    const changes = [...merged.values()].filter(
+      (c) => JSON.stringify(c.before ?? null) !== JSON.stringify(c.after ?? null),
+    );
+    const actions = Array.from(new Set(ordered.map((r) => r.action.replaceAll("_", " "))));
+    const descriptions = Array.from(new Set(ordered.map((r) => r.description)));
+    return {
+      id: g[0].id,
+      user_id: g[0].user_id,
+      created_at: g[0].created_at,
+      action: actions.join(", "),
+      description: descriptions.join(" · "),
+      voided: ordered.some((r) => /void/i.test(r.action)),
+      changes,
+    };
+  });
 }
