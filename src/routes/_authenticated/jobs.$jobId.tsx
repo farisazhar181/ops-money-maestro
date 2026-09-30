@@ -468,6 +468,9 @@ function JobDetail() {
           <Detail label="Volume / weight" value={job.volume_weight} />
           <Detail label="Origin" value={job.origin} />
           <Detail label="Destination" value={job.destination} />
+          <Detail label="Commodity / cargo" value={job.commodity} />
+          <Detail label="ETD" value={fmtDate(job.etd)} />
+          <Detail label="ETA" value={fmtDate(job.eta)} />
           <Detail label="Status" value={job.status} />
         </CardContent>
       </Card>
