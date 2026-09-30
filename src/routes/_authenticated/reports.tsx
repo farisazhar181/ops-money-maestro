@@ -70,15 +70,22 @@ function ReportsPage() {
     queryKey: ["reports", year],
     enabled: canSeeExecutive,
     queryFn: async () => {
-      const [monthly, ar, ap] = await Promise.all([
+      const [monthly, ar, ap, summary] = await Promise.all([
         supabase.rpc("report_monthly", { _from: `${year}-01-01`, _to: `${year}-12-31` }),
         supabase.rpc("report_aging", { _kind: "ar" }),
         supabase.rpc("report_aging", { _kind: "ap" }),
+        supabase.rpc("report_summary"),
       ]);
       if (monthly.error) throw monthly.error;
       if (ar.error) throw ar.error;
       if (ap.error) throw ap.error;
-      return { monthly: monthly.data ?? [], ar: ar.data ?? [], ap: ap.data ?? [] };
+      if (summary.error) throw summary.error;
+      return {
+        monthly: monthly.data ?? [],
+        ar: ar.data ?? [],
+        ap: ap.data ?? [],
+        summary: summary.data?.[0],
+      };
     },
   });
 
@@ -93,8 +100,38 @@ function ReportsPage() {
       grossProfit: revenue - cost,
       overhead,
       netProfit: num(row.net_profit),
+      opIn: num(row.op_cash_in),
+      opOut: num(row.op_cash_out),
+      finIn: num(row.financing_in),
+      finOut: num(row.financing_out),
     };
   });
+  const s = data?.summary;
+  const npm = s && num(s.revenue) > 0 ? num(s.net_profit) / num(s.revenue) : null;
+  const ltr = s?.liabilities_to_revenue == null ? null : num(s.liabilities_to_revenue);
+  const liq = s?.liquidity_ratio == null ? null : num(s.liquidity_ratio);
+  const ratios: [string, string, string, string][] = [
+    [
+      "Profitability (Net Profit Margin)",
+      npm == null ? "—" : `${(npm * 100).toFixed(1)}%`,
+      "Net Profit ÷ Revenue",
+      `${idr(s?.net_profit)} ÷ ${idr(s?.revenue)}`,
+    ],
+    [
+      "Liabilities to Revenue",
+      ltr == null ? "—" : `${(ltr * 100).toFixed(1)}%`,
+      "Outstanding payables ÷ Revenue",
+      `${idr(s?.ap_outstanding)} ÷ ${idr(s?.revenue)}`,
+    ],
+    [
+      "Liquidity Ratio",
+      liq == null ? "—" : `${liq.toFixed(2)}x`,
+      "(Cash position + AR outstanding) ÷ AP outstanding",
+      `(${idr(s?.cash_position)} + ${idr(s?.ar_outstanding)}) ÷ ${idr(s?.ap_outstanding)}`,
+    ],
+  ];
+  const monthLabel = (m: string) =>
+    new Date(`${m}-01T00:00:00`).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
   const margin = (profit: number, revenue: number) =>
     revenue ? `${((profit / revenue) * 100).toFixed(1)}%` : "—";
   const arRows = data?.ar ?? [];
