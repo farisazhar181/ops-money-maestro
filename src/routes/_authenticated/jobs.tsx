@@ -62,6 +62,9 @@ const empty = {
   volume_weight: "",
   origin: "",
   destination: "",
+  commodity: "",
+  etd: "",
+  eta: "",
   selling_price: "",
   buying_price_est: "",
 };
@@ -111,6 +114,9 @@ function JobsPage() {
         _volume_weight: form.volume_weight,
         _origin: form.origin,
         _destination: form.destination,
+        _commodity: form.commodity,
+        _etd: form.etd || (null as unknown as string),
+        _eta: form.eta || (null as unknown as string),
         ...(canEditFinance
           ? {
               _estimated_selling: numOrNull(form.selling_price) ?? 0,
