@@ -1309,6 +1309,8 @@ export type Database = {
         Returns: {
           ap_outstanding: number
           ar_outstanding: number
+          cash_position: number
+          liquidity_ratio: number
           month: string
         }[]
       }
@@ -1338,12 +1340,14 @@ export type Database = {
           ap_paid: number
           ar_outstanding: number
           ar_received: number
+          cash_position: number
           cost: number
           financing_in: number
           financing_out: number
           jobs_closed: number
           jobs_total: number
           liabilities_to_revenue: number
+          liquidity_ratio: number
           net_financing: number
           net_operating_cash: number
           net_profit: number
