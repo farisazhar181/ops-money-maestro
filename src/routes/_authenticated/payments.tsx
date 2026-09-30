@@ -123,6 +123,8 @@ function PaymentsPage() {
         </p>
       </div>
 
+      <OpeningCashCard canEdit={canEditFinance} />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
