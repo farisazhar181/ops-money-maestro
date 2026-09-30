@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, idr } from "@/lib/format";
 
 /** Names of users the current role is allowed to read (for "voided by"). */
 export function useProfileNames() {
@@ -170,8 +170,14 @@ export function FormField({
 }
 
 const HIDDEN_KEYS = new Set(["id", "updated_at", "created_at", "created_by"]);
-const showValue = (v: unknown) =>
-  v === null || v === undefined || v === "" ? "—" : String(v);
+const MONEY_FIELD = /amount|selling|buying|margin_value|balance|paid|remaining|^margin$/;
+const showValue = (v: unknown, field = "") => {
+  if (v === null || v === undefined || v === "") return "—";
+  if (MONEY_FIELD.test(field) && !/pct/.test(field) && Number.isFinite(Number(v))) return idr(Number(v));
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v))
+    return new Date(v).toLocaleString("en-GB", { timeZone: "Asia/Jakarta" });
+  return String(v);
+};
 
 export type FieldChange = { field: string; before: unknown; after: unknown };
 
@@ -196,9 +202,9 @@ export function ChangeList({ changes, voided = false }: { changes: FieldChange[]
         <li key={c.field}>
           <span className="capitalize text-muted-foreground">{c.field.replaceAll("_", " ")}:</span>{" "}
           <span className={voided ? "line-through decoration-muted-foreground/50" : ""}>
-            {showValue(c.before)}
+            {showValue(c.before, c.field)}
           </span>{" "}
-          → <span className="font-medium">{showValue(c.after)}</span>
+          → <span className="font-medium">{showValue(c.after, c.field)}</span>
         </li>
       ))}
     </ul>
