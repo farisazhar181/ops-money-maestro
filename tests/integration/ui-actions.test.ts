@@ -79,9 +79,21 @@ describe.skipIf(!enabled)("validated actions", () => {
     );
     expect(f.error).toBeNull();
     const o = await ops.rpc("create_job", jobArgs({ _estimated_selling: 100 }));
-    expect(o.error?.message).toMatch(/Owner or Finance/);
+    expect(o.error?.message).toMatch(/Management or Finance/);
     const o2 = await ops.rpc("create_job", jobArgs());
     expect(o2.error).toBeNull();
+    const zero = await finance.rpc(
+      "create_job",
+      jobArgs({ _estimated_selling: 0, _estimated_buying: 50 }),
+    );
+    expect(zero.error?.message).toMatch(/greater than zero/);
+    const toActive = await finance.rpc("close_job_financials", {
+      _job_id: o2.data!.id,
+      _actual_selling: NULL as unknown as number,
+      _actual_buying: NULL as unknown as number,
+      _status: "Active",
+    });
+    expect(toActive.error?.message).toMatch(/estimated selling and estimated buying/);
     const log = await finance.from("activity_log").select("entity_type").eq("job_id", f.data!.id);
     expect(log.data!.map((r) => r.entity_type).sort()).toEqual(["job_financials", "jobs"]);
     const opsLog = await ops.from("activity_log").select("entity_type").eq("job_id", f.data!.id);
@@ -91,7 +103,10 @@ describe.skipIf(!enabled)("validated actions", () => {
   });
 
   it("Operations logs an unpaid AP line but cannot edit, void or pay it", async () => {
-    const job = await finance.rpc("create_job", jobArgs());
+    const job = await finance.rpc(
+      "create_job",
+      jobArgs({ _estimated_selling: 10, _estimated_buying: 5 }),
+    );
     const ap = await ops.rpc("create_ap", {
       _job_id: job.data!.id,
       _vendor_id: NULL,
