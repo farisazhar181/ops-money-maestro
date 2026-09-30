@@ -62,6 +62,9 @@ const empty = {
   volume_weight: "",
   origin: "",
   destination: "",
+  commodity: "",
+  etd: "",
+  eta: "",
   selling_price: "",
   buying_price_est: "",
 };
@@ -111,6 +114,9 @@ function JobsPage() {
         _volume_weight: form.volume_weight,
         _origin: form.origin,
         _destination: form.destination,
+        _commodity: form.commodity,
+        _etd: form.etd || (null as unknown as string),
+        _eta: form.eta || (null as unknown as string),
         ...(canEditFinance
           ? {
               _estimated_selling: numOrNull(form.selling_price) ?? 0,
@@ -230,9 +236,27 @@ function JobsPage() {
                     value={form.destination}
                     onChange={(v) => setForm({ ...form, destination: v })}
                   />
+                  <Field
+                    label="Commodity / cargo description"
+                    value={form.commodity}
+                    onChange={(v) => setForm({ ...form, commodity: v })}
+                    placeholder="e.g. Electronics, garments"
+                  />
+                  <Field
+                    label="ETD (est. departure)"
+                    type="date"
+                    value={form.etd}
+                    onChange={(v) => setForm({ ...form, etd: v })}
+                  />
+                  <Field
+                    label="ETA (est. arrival)"
+                    type="date"
+                    value={form.eta}
+                    onChange={(v) => setForm({ ...form, eta: v })}
+                  />
                   {canEditFinance && (
                     <Field
-                      label="Estimated selling (IDR)"
+                      label="Estimated selling (IDR) — required"
                       type="money"
                       value={form.selling_price}
                       onChange={(v) => setForm({ ...form, selling_price: v })}
@@ -240,7 +264,7 @@ function JobsPage() {
                   )}
                   {canEditFinance && (
                     <Field
-                      label="Estimated buying (IDR)"
+                      label="Estimated buying (IDR) — required"
                       type="money"
                       value={form.buying_price_est}
                       onChange={(v) => setForm({ ...form, buying_price_est: v })}
@@ -250,7 +274,13 @@ function JobsPage() {
                 <DialogFooter>
                   <Button
                     onClick={() => create.mutate()}
-                    disabled={!form.job_sheet_no || create.isPending}
+                    disabled={
+                      !form.job_sheet_no ||
+                      (canEditFinance &&
+                        ((numOrNull(form.selling_price) ?? 0) <= 0 ||
+                          (numOrNull(form.buying_price_est) ?? 0) <= 0)) ||
+                      create.isPending
+                    }
                   >
                     Create job sheet
                   </Button>
@@ -274,6 +304,9 @@ function JobsPage() {
                 <TableHead>Job sheet</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Route</TableHead>
+                <TableHead>Commodity</TableHead>
+                <TableHead>ETD</TableHead>
+                <TableHead>ETA</TableHead>
                 <TableHead>Order date</TableHead>
                 <TableHead className="text-right">Selling</TableHead>
                 <TableHead className="text-right">Est. cost</TableHead>
@@ -298,6 +331,9 @@ function JobsPage() {
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {j.origin || "?"} → {j.destination || "?"}
                   </TableCell>
+                  <TableCell className="text-muted-foreground">{j.commodity || "—"}</TableCell>
+                  <TableCell>{fmtDate(j.etd)}</TableCell>
+                  <TableCell>{fmtDate(j.eta)}</TableCell>
                   <TableCell>{fmtDate(j.order_date)}</TableCell>
                   <TableCell className="text-right">
                     {j.job_financials ? idr(j.job_financials.estimated_selling) : "—"}
@@ -313,7 +349,7 @@ function JobsPage() {
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
                     No job sheets yet.
                   </TableCell>
                 </TableRow>
