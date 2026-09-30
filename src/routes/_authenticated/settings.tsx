@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate } from "@/lib/format";
-import { useAuthUser, useRoles, type AppRole } from "@/hooks/use-auth";
+import { useAuthUser, useRoles, roleLabel, type AppRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -145,7 +145,7 @@ function SettingsPage() {
                       variant={u.status === "deactivated" ? "destructive" : "secondary"}
                       className="capitalize"
                     >
-                      {u.status === "active" ? (u.role ?? "pending") : u.status}
+                      {u.status === "active" ? (roleLabel(u.role) || "pending") : u.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

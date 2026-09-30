@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuthUser, useRoles } from "@/hooks/use-auth";
+import { roleLabel, useAuthUser, useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -72,7 +72,7 @@ function AuthenticatedLayout() {
             <div className="flex items-center gap-3">
               {primaryRole && (
                 <Badge variant="secondary" className="capitalize">
-                  {primaryRole}
+                  {roleLabel(primaryRole)}
                 </Badge>
               )}
               <span className="hidden text-sm text-muted-foreground sm:inline">{user?.email}</span>
