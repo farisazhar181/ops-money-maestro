@@ -502,10 +502,13 @@ export type Database = {
       jobs: {
         Row: {
           closed_at: string | null
+          commodity: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
           destination: string | null
+          eta: string | null
+          etd: string | null
           id: string
           is_void: boolean
           job_sheet_no: string
@@ -523,10 +526,13 @@ export type Database = {
         }
         Insert: {
           closed_at?: string | null
+          commodity?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
           destination?: string | null
+          eta?: string | null
+          etd?: string | null
           id?: string
           is_void?: boolean
           job_sheet_no: string
@@ -544,10 +550,13 @@ export type Database = {
         }
         Update: {
           closed_at?: string | null
+          commodity?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
           destination?: string | null
+          eta?: string | null
+          etd?: string | null
           id?: string
           is_void?: boolean
           job_sheet_no?: string
@@ -903,48 +912,100 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      create_job: {
-        Args: {
-          _customer_id: string
-          _destination: string
-          _estimated_buying?: number
-          _estimated_selling?: number
-          _job_sheet_no: string
-          _order_date: string
-          _origin: string
-          _quantity: string
-          _service_type: string
-          _unit_type: string
-          _volume_weight: string
-        }
-        Returns: {
-          closed_at: string | null
-          created_at: string
-          created_by: string | null
-          customer_id: string | null
-          destination: string | null
-          id: string
-          is_void: boolean
-          job_sheet_no: string
-          order_date: string
-          origin: string | null
-          quantity: string | null
-          service_type: string | null
-          status: Database["public"]["Enums"]["job_status"]
-          unit_type: string | null
-          updated_at: string
-          void_reason: string | null
-          voided_at: string | null
-          voided_by: string | null
-          volume_weight: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "jobs"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      create_job:
+        | {
+            Args: {
+              _customer_id: string
+              _destination: string
+              _estimated_buying?: number
+              _estimated_selling?: number
+              _job_sheet_no: string
+              _order_date: string
+              _origin: string
+              _quantity: string
+              _service_type: string
+              _unit_type: string
+              _volume_weight: string
+            }
+            Returns: {
+              closed_at: string | null
+              commodity: string | null
+              created_at: string
+              created_by: string | null
+              customer_id: string | null
+              destination: string | null
+              eta: string | null
+              etd: string | null
+              id: string
+              is_void: boolean
+              job_sheet_no: string
+              order_date: string
+              origin: string | null
+              quantity: string | null
+              service_type: string | null
+              status: Database["public"]["Enums"]["job_status"]
+              unit_type: string | null
+              updated_at: string
+              void_reason: string | null
+              voided_at: string | null
+              voided_by: string | null
+              volume_weight: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "jobs"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: {
+              _commodity?: string
+              _customer_id: string
+              _destination: string
+              _estimated_buying?: number
+              _estimated_selling?: number
+              _eta?: string
+              _etd?: string
+              _job_sheet_no: string
+              _order_date: string
+              _origin: string
+              _quantity: string
+              _service_type: string
+              _unit_type: string
+              _volume_weight: string
+            }
+            Returns: {
+              closed_at: string | null
+              commodity: string | null
+              created_at: string
+              created_by: string | null
+              customer_id: string | null
+              destination: string | null
+              eta: string | null
+              etd: string | null
+              id: string
+              is_void: boolean
+              job_sheet_no: string
+              order_date: string
+              origin: string | null
+              quantity: string | null
+              service_type: string | null
+              status: Database["public"]["Enums"]["job_status"]
+              unit_type: string | null
+              updated_at: string
+              void_reason: string | null
+              voided_at: string | null
+              voided_by: string | null
+              volume_weight: string | null
+            }
+            SetofOptions: {
+              from: "*"
+              to: "jobs"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       create_overhead: {
         Args: {
           _amount: number
@@ -1389,10 +1450,13 @@ export type Database = {
         }
         Returns: {
           closed_at: string | null
+          commodity: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
           destination: string | null
+          eta: string | null
+          etd: string | null
           id: string
           is_void: boolean
           job_sheet_no: string
@@ -1526,10 +1590,13 @@ export type Database = {
         Args: { _job_id: string; _reason: string }
         Returns: {
           closed_at: string | null
+          commodity: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
           destination: string | null
+          eta: string | null
+          etd: string | null
           id: string
           is_void: boolean
           job_sheet_no: string
