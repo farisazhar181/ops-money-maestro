@@ -274,7 +274,13 @@ function JobsPage() {
                 <DialogFooter>
                   <Button
                     onClick={() => create.mutate()}
-                    disabled={!form.job_sheet_no || create.isPending}
+                    disabled={
+                      !form.job_sheet_no ||
+                      (canEditFinance &&
+                        ((numOrNull(form.selling_price) ?? 0) <= 0 ||
+                          (numOrNull(form.buying_price_est) ?? 0) <= 0)) ||
+                      create.isPending
+                    }
                   >
                     Create job sheet
                   </Button>
@@ -298,6 +304,9 @@ function JobsPage() {
                 <TableHead>Job sheet</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Route</TableHead>
+                <TableHead>Commodity</TableHead>
+                <TableHead>ETD</TableHead>
+                <TableHead>ETA</TableHead>
                 <TableHead>Order date</TableHead>
                 <TableHead className="text-right">Selling</TableHead>
                 <TableHead className="text-right">Est. cost</TableHead>
@@ -322,6 +331,9 @@ function JobsPage() {
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {j.origin || "?"} → {j.destination || "?"}
                   </TableCell>
+                  <TableCell className="text-muted-foreground">{j.commodity || "—"}</TableCell>
+                  <TableCell>{fmtDate(j.etd)}</TableCell>
+                  <TableCell>{fmtDate(j.eta)}</TableCell>
                   <TableCell>{fmtDate(j.order_date)}</TableCell>
                   <TableCell className="text-right">
                     {j.job_financials ? idr(j.job_financials.estimated_selling) : "—"}
@@ -337,7 +349,7 @@ function JobsPage() {
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
                     No job sheets yet.
                   </TableCell>
                 </TableRow>
