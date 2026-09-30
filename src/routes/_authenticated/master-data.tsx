@@ -154,7 +154,13 @@ function MasterData() {
                       size="sm"
                       onClick={() => {
                         setCustId(null);
-                        setCust({ company_name: "", contact_name: "", phone: "", email: "", address: "" });
+                        setCust({
+                          company_name: "",
+                          contact_name: "",
+                          phone: "",
+                          email: "",
+                          address: "",
+                        });
                       }}
                     >
                       <Plus className="mr-2 h-4 w-4" /> Add customer
@@ -263,7 +269,12 @@ function MasterData() {
                       size="sm"
                       onClick={() => {
                         setVendId(null);
-                        setVend({ vendor_name: "", service_type: "", contact_person: "", phone: "" });
+                        setVend({
+                          vendor_name: "",
+                          service_type: "",
+                          contact_person: "",
+                          phone: "",
+                        });
                       }}
                     >
                       <Plus className="mr-2 h-4 w-4" /> Add vendor

@@ -164,7 +164,7 @@ function OverheadPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Overhead costs are available to Owner and Finance only.
+          Overhead costs are available to Management and Finance only.
         </CardContent>
       </Card>
     );
@@ -321,10 +321,7 @@ function OverheadPage() {
             </div>
             <div className="space-y-2">
               <Label>Amount (IDR)</Label>
-              <MoneyInput
-                value={form.amount}
-                onChange={(v) => setForm({ ...form, amount: v })}
-              />
+              <MoneyInput value={form.amount} onChange={(v) => setForm({ ...form, amount: v })} />
             </div>
             <div className="space-y-2">
               <Label>Note</Label>

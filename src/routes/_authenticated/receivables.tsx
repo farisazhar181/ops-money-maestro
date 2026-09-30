@@ -250,10 +250,7 @@ function ReceivablesPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Amount (balance {idr(payFor?.balance ?? 0)})</Label>
-              <MoneyInput
-                value={pay.amount}
-                onChange={(v) => setPay({ ...pay, amount: v })}
-              />
+              <MoneyInput value={pay.amount} onChange={(v) => setPay({ ...pay, amount: v })} />
             </div>
             <div className="space-y-2">
               <Label>Date (not before {fmtDate(payFor?.minDate)})</Label>

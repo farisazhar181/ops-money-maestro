@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuthUser, useRoles } from "@/hooks/use-auth";
+import { roleLabel, useAuthUser, useRoles } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -46,8 +46,8 @@ function AuthenticatedLayout() {
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {isDeactivated
-              ? "Your account no longer has access. Contact an Owner or Finance user if this is unexpected."
-              : "Your account is ready. An Owner or Finance user must assign your role before you can continue."}
+              ? "Your account no longer has access. Contact a Management or Finance user if this is unexpected."
+              : "Your account is ready. A Management or Finance user must assign your role before you can continue."}
           </p>
           <Button className="mt-6" variant="outline" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" /> Sign out
@@ -72,7 +72,7 @@ function AuthenticatedLayout() {
             <div className="flex items-center gap-3">
               {primaryRole && (
                 <Badge variant="secondary" className="capitalize">
-                  {primaryRole}
+                  {roleLabel(primaryRole)}
                 </Badge>
               )}
               <span className="hidden text-sm text-muted-foreground sm:inline">{user?.email}</span>

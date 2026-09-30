@@ -119,7 +119,7 @@ function InvestorsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Investor transactions are available to Owner and Finance only.
+          Investor transactions are available to Management and Finance only.
         </CardContent>
       </Card>
     );

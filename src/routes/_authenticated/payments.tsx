@@ -34,6 +34,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { idr, num, fmtDate } from "@/lib/format";
 import { useRoles } from "@/hooks/use-auth";
+import { OpeningCashCard } from "@/components/opening-cash-card";
 import { cashFlowDirection, cashFlowLabel } from "@/lib/finance-rules";
 
 export const Route = createFileRoute("/_authenticated/payments")({
@@ -122,6 +123,8 @@ function PaymentsPage() {
           paid.
         </p>
       </div>
+
+      <OpeningCashCard canEdit={canEditFinance} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>

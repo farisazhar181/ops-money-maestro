@@ -173,7 +173,9 @@ const HIDDEN_KEYS = new Set(["id", "updated_at", "created_at", "created_by"]);
 const MONEY_FIELD = /amount|selling|buying|margin_value|balance|paid|remaining|^margin$/;
 const showValue = (v: unknown, field = "") => {
   if (v === null || v === undefined || v === "") return "—";
-  if (MONEY_FIELD.test(field) && !/pct/.test(field) && Number.isFinite(Number(v))) return idr(Number(v));
+  if (field === "role" && v === "owner") return "Management";
+  if (MONEY_FIELD.test(field) && !/pct/.test(field) && Number.isFinite(Number(v)))
+    return idr(Number(v));
   if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v))
     return new Date(v).toLocaleString("en-GB", { timeZone: "Asia/Jakarta" });
   return String(v);
@@ -194,7 +196,13 @@ export function diffFields(before: unknown, after: unknown): FieldChange[] {
 }
 
 /** "Field: old → new" lines. Strikethrough only for voids. */
-export function ChangeList({ changes, voided = false }: { changes: FieldChange[]; voided?: boolean }) {
+export function ChangeList({
+  changes,
+  voided = false,
+}: {
+  changes: FieldChange[];
+  voided?: boolean;
+}) {
   if (changes.length === 0) return null;
   return (
     <ul className="mt-2 space-y-0.5 text-xs">

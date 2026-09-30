@@ -7,7 +7,9 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   // Generated files are rewritten by tooling; linting them only produces noise.
-  { ignores: ["dist", ".output", ".vinxi", "src/integrations/supabase/**", "src/routeTree.gen.ts"] },
+  {
+    ignores: ["dist", ".output", ".vinxi", "src/integrations/supabase/**", "src/routeTree.gen.ts"],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

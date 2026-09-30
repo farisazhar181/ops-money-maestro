@@ -67,3 +67,9 @@ export function useRoles() {
     primaryRole: roles.includes("owner") ? "owner" : roles[0],
   };
 }
+
+/** Display label for a stored role; the stored value `owner` is shown as "Management". */
+export function roleLabel(role: string | null | undefined): string {
+  if (!role) return "";
+  return role === "owner" ? "Management" : role.charAt(0).toUpperCase() + role.slice(1);
+}
