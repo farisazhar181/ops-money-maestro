@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -147,6 +148,13 @@ export function FormField({
   min?: string;
   placeholder?: string;
 }) {
+  if (type === "money")
+    return (
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        <MoneyInput value={value} onChange={onChange} placeholder={placeholder} />
+      </div>
+    );
   return (
     <div className="space-y-2">
       <Label>{label}</Label>

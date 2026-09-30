@@ -285,7 +285,7 @@ function InvestorsPage() {
             </div>
             <FormField
               label="Amount (IDR)"
-              type="number"
+              type="money"
               value={form.amount}
               onChange={(v) => setForm({ ...form, amount: v })}
             />

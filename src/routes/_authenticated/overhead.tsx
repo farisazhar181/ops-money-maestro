@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Banknote, Ban, Pencil, Plus, ShieldAlert } from "lucide-react";
@@ -320,10 +321,9 @@ function OverheadPage() {
             </div>
             <div className="space-y-2">
               <Label>Amount (IDR)</Label>
-              <Input
-                type="number"
+              <MoneyInput
                 value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                onChange={(v) => setForm({ ...form, amount: v })}
               />
             </div>
             <div className="space-y-2">

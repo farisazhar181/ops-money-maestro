@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ban, Banknote, Download, FileText, Pencil, Plus } from "lucide-react";
@@ -872,13 +873,13 @@ function JobDetail() {
           <div className="space-y-4">
             <Field
               label="Actual selling (IDR)"
-              type="number"
+              type="money"
               value={closing.actual_selling}
               onChange={(value) => setClosing({ ...closing, actual_selling: value })}
             />
             <Field
               label="Actual buying (IDR)"
-              type="number"
+              type="money"
               value={closing.actual_buying}
               onChange={(value) => setClosing({ ...closing, actual_buying: value })}
             />
@@ -939,7 +940,7 @@ function JobDetail() {
             />
             <Field
               label="Invoice amount (IDR)"
-              type="number"
+              type="money"
               value={ap.invoice_amount}
               onChange={(value) => setAp({ ...ap, invoice_amount: value })}
             />
@@ -999,7 +1000,7 @@ function JobDetail() {
             />
             <Field
               label="Amount (IDR)"
-              type="number"
+              type="money"
               value={inv.amount}
               onChange={(value) => setInv({ ...inv, amount: value })}
             />
@@ -1049,13 +1050,13 @@ function JobDetail() {
           <div className="space-y-4">
             <Field
               label="Estimated selling (IDR)"
-              type="number"
+              type="money"
               value={est.selling}
               onChange={(value) => setEst({ ...est, selling: value })}
             />
             <Field
               label="Estimated buying (IDR)"
-              type="number"
+              type="money"
               value={est.buying}
               onChange={(value) => setEst({ ...est, buying: value })}
             />
@@ -1075,7 +1076,7 @@ function JobDetail() {
           <div className="space-y-4">
             <Field
               label={`Amount (balance ${idr(payment?.balance)})`}
-              type="number"
+              type="money"
               value={paymentForm.amount}
               onChange={(value) => setPaymentForm({ ...paymentForm, amount: value })}
             />
@@ -1122,6 +1123,13 @@ function Field({
   type?: string;
   min?: string | undefined;
 }) {
+  if (type === "money")
+    return (
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        <MoneyInput value={value} onChange={onChange} />
+      </div>
+    );
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
