@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -232,7 +233,7 @@ function JobsPage() {
                   {canEditFinance && (
                     <Field
                       label="Estimated selling (IDR)"
-                      type="number"
+                      type="money"
                       value={form.selling_price}
                       onChange={(v) => setForm({ ...form, selling_price: v })}
                     />
@@ -240,7 +241,7 @@ function JobsPage() {
                   {canEditFinance && (
                     <Field
                       label="Estimated buying (IDR)"
-                      type="number"
+                      type="money"
                       value={form.buying_price_est}
                       onChange={(v) => setForm({ ...form, buying_price_est: v })}
                     />
@@ -338,6 +339,13 @@ function Field({
   type?: string;
   placeholder?: string;
 }) {
+  if (type === "money")
+    return (
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        <MoneyInput value={value} onChange={onChange} placeholder={placeholder} />
+      </div>
+    );
   return (
     <div className="space-y-2">
       <Label>{label}</Label>

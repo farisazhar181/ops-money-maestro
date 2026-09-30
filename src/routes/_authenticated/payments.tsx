@@ -270,7 +270,7 @@ function PaymentsPage() {
               />
               <FormField
                 label="Amount (IDR)"
-                type="number"
+                type="money"
                 value={editTx.amount}
                 onChange={(v) => setEditTx({ ...editTx, amount: v })}
               />

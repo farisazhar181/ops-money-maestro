@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, idr } from "@/lib/format";
 
 /** Names of users the current role is allowed to read (for "voided by"). */
 export function useProfileNames() {
@@ -147,6 +148,13 @@ export function FormField({
   min?: string;
   placeholder?: string;
 }) {
+  if (type === "money")
+    return (
+      <div className="space-y-2">
+        <Label>{label}</Label>
+        <MoneyInput value={value} onChange={onChange} placeholder={placeholder} />
+      </div>
+    );
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
@@ -161,34 +169,48 @@ export function FormField({
   );
 }
 
-/** Before/after table for an activity entry; skips bookkeeping fields. */
 const HIDDEN_KEYS = new Set(["id", "updated_at", "created_at", "created_by"]);
-export function ChangeDiff({ before, after }: { before: unknown; after: unknown }) {
-  const b = (before && typeof before === "object" ? before : {}) as Record<string, unknown>;
+const MONEY_FIELD = /amount|selling|buying|margin_value|balance|paid|remaining|^margin$/;
+const showValue = (v: unknown, field = "") => {
+  if (v === null || v === undefined || v === "") return "—";
+  if (MONEY_FIELD.test(field) && !/pct/.test(field) && Number.isFinite(Number(v))) return idr(Number(v));
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v))
+    return new Date(v).toLocaleString("en-GB", { timeZone: "Asia/Jakarta" });
+  return String(v);
+};
+
+export type FieldChange = { field: string; before: unknown; after: unknown };
+
+/** Fields that differ between two snapshots; skips bookkeeping fields. */
+export function diffFields(before: unknown, after: unknown): FieldChange[] {
+  if (!before || typeof before !== "object") return [];
+  const b = before as Record<string, unknown>;
   const a = (after && typeof after === "object" ? after : {}) as Record<string, unknown>;
-  const keys = Array.from(new Set([...Object.keys(b), ...Object.keys(a)])).filter(
-    (k) => !HIDDEN_KEYS.has(k) && JSON.stringify(b[k] ?? null) !== JSON.stringify(a[k] ?? null),
-  );
-  if (!before || keys.length === 0) return null;
-  const show = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v));
+  return Array.from(new Set([...Object.keys(b), ...Object.keys(a)]))
+    .filter(
+      (k) => !HIDDEN_KEYS.has(k) && JSON.stringify(b[k] ?? null) !== JSON.stringify(a[k] ?? null),
+    )
+    .map((k) => ({ field: k, before: b[k], after: a[k] }));
+}
+
+/** "Field: old → new" lines. Strikethrough only for voids. */
+export function ChangeList({ changes, voided = false }: { changes: FieldChange[]; voided?: boolean }) {
+  if (changes.length === 0) return null;
   return (
-    <table className="mt-2 w-full text-xs">
-      <thead>
-        <tr className="text-muted-foreground">
-          <th className="pr-3 text-left font-normal">Field</th>
-          <th className="pr-3 text-left font-normal">Before</th>
-          <th className="text-left font-normal">After</th>
-        </tr>
-      </thead>
-      <tbody>
-        {keys.map((k) => (
-          <tr key={k}>
-            <td className="pr-3 text-muted-foreground">{k.replaceAll("_", " ")}</td>
-            <td className="pr-3 line-through decoration-muted-foreground/50">{show(b[k])}</td>
-            <td className="font-medium">{show(a[k])}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <ul className="mt-2 space-y-0.5 text-xs">
+      {changes.map((c) => (
+        <li key={c.field}>
+          <span className="capitalize text-muted-foreground">{c.field.replaceAll("_", " ")}:</span>{" "}
+          <span className={voided ? "line-through decoration-muted-foreground/50" : ""}>
+            {showValue(c.before, c.field)}
+          </span>{" "}
+          → <span className="font-medium">{showValue(c.after, c.field)}</span>
+        </li>
+      ))}
+    </ul>
   );
+}
+
+export function ChangeDiff({ before, after }: { before: unknown; after: unknown }) {
+  return <ChangeList changes={diffFields(before, after)} />;
 }

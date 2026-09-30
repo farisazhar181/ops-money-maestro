@@ -129,7 +129,7 @@ export function EditApDialog({
           />
           <FormField
             label={`Amount (IDR) — not below paid ${idr(row?.paid_amount)}`}
-            type="number"
+            type="money"
             value={f.amount}
             onChange={(v) => setF({ ...f, amount: v })}
           />
@@ -251,7 +251,7 @@ export function EditArDialog({
           />
           <FormField
             label={`Amount (IDR) — not below received ${idr(row?.paid_amount)}`}
-            type="number"
+            type="money"
             value={f.amount}
             onChange={(v) => setF({ ...f, amount: v })}
           />

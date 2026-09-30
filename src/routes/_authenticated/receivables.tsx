@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MoneyInput } from "@/components/money-input";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ban, Banknote, Pencil } from "lucide-react";
@@ -249,10 +250,9 @@ function ReceivablesPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Amount (balance {idr(payFor?.balance ?? 0)})</Label>
-              <Input
-                type="number"
+              <MoneyInput
                 value={pay.amount}
-                onChange={(e) => setPay({ ...pay, amount: e.target.value })}
+                onChange={(v) => setPay({ ...pay, amount: v })}
               />
             </div>
             <div className="space-y-2">
