@@ -177,11 +177,129 @@ function ReportsPage() {
       </div>
 
       <Tabs defaultValue="pnl">
-        <TabsList className="grid w-full grid-cols-3 sm:w-fit">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start sm:w-fit">
           <TabsTrigger value="pnl">Monthly P&amp;L</TabsTrigger>
+          <TabsTrigger value="is">Income Statement</TabsTrigger>
+          <TabsTrigger value="cfs">Cash Flow Statement</TabsTrigger>
+          <TabsTrigger value="ratios">Financial Ratios</TabsTrigger>
           <TabsTrigger value="ar">AR aging</TabsTrigger>
           <TabsTrigger value="ap">AP aging</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="is">
+          <ReportCard
+            title={`Income Statement · ${year}`}
+            onExport={() =>
+              downloadCsv(
+                `income-statement-${year}.csv`,
+                ["Line item", ...pnl.map((r) => r.month)],
+                [
+                  ["Revenue", ...pnl.map((r) => r.revenue)],
+                  ["Cost of Services", ...pnl.map((r) => r.cost)],
+                  ["Gross Profit", ...pnl.map((r) => r.grossProfit)],
+                  ["Overhead", ...pnl.map((r) => r.overhead)],
+                  ["Net Profit", ...pnl.map((r) => r.netProfit)],
+                ],
+              )
+            }
+          >
+            <p className="mb-3 text-xs text-muted-foreground">
+              Same figures as the Monthly P&amp;L. Voided records and investor transactions are
+              excluded.
+            </p>
+            <StatementTable
+              months={pnl.map((r) => monthLabel(r.month))}
+              rows={[
+                { label: "Revenue", values: pnl.map((r) => r.revenue) },
+                { label: "Cost of Services", values: pnl.map((r) => r.cost) },
+                { label: "Gross Profit", values: pnl.map((r) => r.grossProfit), bold: true },
+                { label: "Overhead", values: pnl.map((r) => r.overhead) },
+                { label: "Net Profit", values: pnl.map((r) => r.netProfit), bold: true },
+              ]}
+            />
+          </ReportCard>
+        </TabsContent>
+
+        <TabsContent value="cfs">
+          <ReportCard
+            title={`Cash Flow Statement · ${year}`}
+            onExport={() =>
+              downloadCsv(
+                `cash-flow-statement-${year}.csv`,
+                ["Section", "Line item", ...pnl.map((r) => r.month)],
+                [
+                  ["Operating", "Receipts from customers", ...pnl.map((r) => r.opIn)],
+                  ["Operating", "Payments to vendors & overhead", ...pnl.map((r) => -r.opOut)],
+                  ["Operating", "Net operating cash flow", ...pnl.map((r) => r.opIn - r.opOut)],
+                  ["Financing", "Investor loans in", ...pnl.map((r) => r.finIn)],
+                  ["Financing", "Investor repayments", ...pnl.map((r) => -r.finOut)],
+                  ["Financing", "Net financing cash flow", ...pnl.map((r) => r.finIn - r.finOut)],
+                ],
+              )
+            }
+          >
+            <p className="mb-3 text-xs text-muted-foreground">
+              Built from the Cash Flow ledger and Investor Transactions. Operating covers customer
+              receipts, vendor payments and overhead payments; Financing covers investor loans and
+              repayments only.
+            </p>
+            <StatementTable
+              months={pnl.map((r) => monthLabel(r.month))}
+              rows={[
+                { label: "Operating activities", section: true, values: [] },
+                { label: "Receipts from customers", values: pnl.map((r) => r.opIn) },
+                { label: "Payments to vendors & overhead", values: pnl.map((r) => -r.opOut) },
+                {
+                  label: "Net operating cash flow",
+                  values: pnl.map((r) => r.opIn - r.opOut),
+                  bold: true,
+                },
+                { label: "Financing activities", section: true, values: [] },
+                { label: "Investor loans in", values: pnl.map((r) => r.finIn) },
+                { label: "Investor repayments", values: pnl.map((r) => -r.finOut) },
+                {
+                  label: "Net financing cash flow",
+                  values: pnl.map((r) => r.finIn - r.finOut),
+                  bold: true,
+                },
+              ]}
+            />
+          </ReportCard>
+        </TabsContent>
+
+        <TabsContent value="ratios">
+          <ReportCard
+            title="Financial Ratios · to date"
+            onExport={() =>
+              downloadCsv(
+                "financial-ratios.csv",
+                ["Ratio", "Value", "Formula", "Inputs"],
+                ratios,
+              )
+            }
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ratio</TableHead>
+                  <TableHead className="text-right">Value</TableHead>
+                  <TableHead>Formula</TableHead>
+                  <TableHead>Inputs</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ratios.map(([name, value, formula, inputs]) => (
+                  <TableRow key={name}>
+                    <TableCell className="font-medium">{name}</TableCell>
+                    <TableCell className="text-right font-display text-base">{value}</TableCell>
+                    <TableCell className="text-muted-foreground">{formula}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{inputs}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ReportCard>
+        </TabsContent>
 
         <TabsContent value="pnl">
           <ReportCard
