@@ -511,3 +511,51 @@ function EmptyRow({ columns }: { columns: number }) {
     </TableRow>
   );
 }
+
+function StatementTable({
+  months,
+  rows,
+}: {
+  months: string[];
+  rows: { label: string; values: number[]; bold?: boolean; section?: boolean }[];
+}) {
+  if (months.length === 0)
+    return <p className="py-10 text-center text-sm text-muted-foreground">No records to display.</p>;
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="min-w-48">Line item</TableHead>
+          {months.map((m) => (
+            <TableHead key={m} className="whitespace-nowrap text-right">
+              {m}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((r) =>
+          r.section ? (
+            <TableRow key={r.label} className="bg-muted/50">
+              <TableCell colSpan={months.length + 1} className="font-semibold">
+                {r.label}
+              </TableCell>
+            </TableRow>
+          ) : (
+            <TableRow key={r.label}>
+              <TableCell className={r.bold ? "font-semibold" : "pl-6"}>{r.label}</TableCell>
+              {r.values.map((v, i) => (
+                <TableCell
+                  key={i}
+                  className={`whitespace-nowrap text-right ${r.bold ? "font-semibold" : ""}`}
+                >
+                  {idr(v)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ),
+        )}
+      </TableBody>
+    </Table>
+  );
+}
