@@ -47,7 +47,7 @@ function AuthenticatedLayout() {
           <p className="mt-2 text-sm text-muted-foreground">
             {isDeactivated
               ? "Your account no longer has access. Contact an Owner or Finance user if this is unexpected."
-              : "Your account is ready. An Owner or Finance user must assign your role before you can continue."}
+              : "Your account is ready. A Management or Finance user must assign your role before you can continue."}
           </p>
           <Button className="mt-6" variant="outline" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" /> Sign out

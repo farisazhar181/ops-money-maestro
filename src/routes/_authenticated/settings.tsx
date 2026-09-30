@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { title: "User Settings | Loka Logistics ERP" },
       {
         name: "description",
-        content: "Manage staff accounts and assign Owner, Finance or Operations roles.",
+        content: "Manage staff accounts and assign Management, Finance or Operations roles.",
       },
       { property: "og:title", content: "User Settings | Loka Logistics ERP" },
       {
@@ -100,7 +100,7 @@ function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Only Owner and Finance users can manage staff access.
+          Only Management and Finance users can manage staff access.
         </CardContent>
       </Card>
     );
@@ -119,7 +119,7 @@ function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Staff accounts ({data?.length ?? 0})</CardTitle>
           <CardDescription>
-            Owner sees everything · Finance handles financial work · Operations manages job sheets.
+            Management sees everything · Finance handles financial work · Operations manages job sheets.
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -158,7 +158,7 @@ function SettingsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {isOwner && <SelectItem value="owner">Owner</SelectItem>}
+                        {isOwner && <SelectItem value="owner">Management</SelectItem>}
                         <SelectItem value="finance">Finance</SelectItem>
                         <SelectItem value="operations">Operations</SelectItem>
                       </SelectContent>

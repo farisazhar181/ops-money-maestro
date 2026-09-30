@@ -164,7 +164,7 @@ function OverheadPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Overhead costs are available to Owner and Finance only.
+          Overhead costs are available to Management and Finance only.
         </CardContent>
       </Card>
     );

@@ -147,7 +147,7 @@ function ReportsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Financial reports are available to Owner and Finance roles only.
+          Financial reports are available to Management and Finance roles only.
         </CardContent>
       </Card>
     );

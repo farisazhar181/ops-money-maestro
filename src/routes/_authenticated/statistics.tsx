@@ -107,7 +107,7 @@ function StatisticsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Statistics are available to Owner and Finance roles only.
+          Statistics are available to Management and Finance roles only.
         </CardContent>
       </Card>
     );

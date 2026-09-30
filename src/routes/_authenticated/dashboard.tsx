@@ -110,7 +110,7 @@ function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Executive financial metrics are available to Owner and Finance roles only. Use Job Sheets
+          Executive financial metrics are available to Management and Finance roles only. Use Job Sheets
           to manage your shipments.
         </CardContent>
       </Card>

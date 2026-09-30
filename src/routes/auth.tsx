@@ -174,7 +174,7 @@ function AuthPage() {
                     Create account
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    New accounts start pending. An Owner or Finance user must assign access.
+                    New accounts start pending. A Management or Finance user must assign access.
                   </p>
                 </form>
               </TabsContent>
