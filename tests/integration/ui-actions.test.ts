@@ -21,9 +21,16 @@ const NULL = null as unknown as string;
 const today = jakartaDate();
 
 async function signIn(email?: string, token?: string): Promise<DB> {
-  if (token) return createClient<Database>(URL, KEY, { ...opts, global: { headers: { Authorization: `Bearer ${token}` } } });
+  if (token)
+    return createClient<Database>(URL, KEY, {
+      ...opts,
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
   const c = createClient<Database>(URL, KEY, opts);
-  const { error } = await c.auth.signInWithPassword({ email: email!, password: env.TEST_PASSWORD! });
+  const { error } = await c.auth.signInWithPassword({
+    email: email!,
+    password: env.TEST_PASSWORD!,
+  });
   if (error) throw error;
   return c;
 }

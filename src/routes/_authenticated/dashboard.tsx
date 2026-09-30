@@ -110,8 +110,8 @@ function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Executive financial metrics are available to Management and Finance roles only. Use Job Sheets
-          to manage your shipments.
+          Executive financial metrics are available to Management and Finance roles only. Use Job
+          Sheets to manage your shipments.
         </CardContent>
       </Card>
     );
@@ -179,7 +179,9 @@ function Dashboard() {
           value={m?.liquidity_ratio == null ? "—" : `${num(m.liquidity_ratio).toFixed(2)}x`}
           sub={`(Cash ${idr(m?.cash_position)} + receivables ${idr(m?.ar_outstanding)}) ÷ payables ${idr(m?.ap_outstanding)}`}
           icon={Scale}
-          tone={m?.liquidity_ratio != null && num(m.liquidity_ratio) < 1 ? "destructive" : "success"}
+          tone={
+            m?.liquidity_ratio != null && num(m.liquidity_ratio) < 1 ? "destructive" : "success"
+          }
         />
 
         <Kpi

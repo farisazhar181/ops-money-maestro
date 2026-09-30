@@ -37,7 +37,13 @@ import { StatusBadge } from "@/components/status-badge";
 import { daysUntil, fmtDate, idr, idrOrUnset, num, numOrNull, pct, today } from "@/lib/format";
 import { closingError, paymentDateError } from "@/lib/finance-rules";
 import { useRoles } from "@/hooks/use-auth";
-import { ChangeList, diffFields, VoidDialog, VoidedNote, useProfileNames } from "@/components/record-actions";
+import {
+  ChangeList,
+  diffFields,
+  VoidDialog,
+  VoidedNote,
+  useProfileNames,
+} from "@/components/record-actions";
 import { EditApDialog, EditArDialog, type ApRow, type ArRow } from "@/components/finance-dialogs";
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
@@ -1185,7 +1191,11 @@ function groupActivity(rows: ActivityRow[]) {
     for (const r of ordered) {
       for (const c of diffFields(r.old_values, r.new_values)) {
         const prev = merged.get(c.field);
-        merged.set(c.field, { field: c.field, before: prev ? prev.before : c.before, after: c.after });
+        merged.set(c.field, {
+          field: c.field,
+          before: prev ? prev.before : c.before,
+          after: c.after,
+        });
       }
     }
     const changes = [...merged.values()].filter(

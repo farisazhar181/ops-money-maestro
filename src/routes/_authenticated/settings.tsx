@@ -119,7 +119,8 @@ function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Staff accounts ({data?.length ?? 0})</CardTitle>
           <CardDescription>
-            Management sees everything · Finance handles financial work · Operations manages job sheets.
+            Management sees everything · Finance handles financial work · Operations manages job
+            sheets.
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -145,7 +146,7 @@ function SettingsPage() {
                       variant={u.status === "deactivated" ? "destructive" : "secondary"}
                       className="capitalize"
                     >
-                      {u.status === "active" ? (roleLabel(u.role) || "pending") : u.status}
+                      {u.status === "active" ? roleLabel(u.role) || "pending" : u.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

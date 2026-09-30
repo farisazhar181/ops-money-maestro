@@ -36,7 +36,10 @@ export function OpeningCashCard({ canEdit }: { canEdit: boolean }) {
       _as_of: asOf,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Opening cash balance saved");
     setEditing(false);
     qc.invalidateQueries();

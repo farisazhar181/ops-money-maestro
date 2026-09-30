@@ -77,7 +77,13 @@ describe.skipIf(!enabled)("role access", () => {
     const f = await ops.from("job_financials").select("*").limit(5);
     expect(f.data ?? []).toEqual([]);
     expect((await finance.from("job_financials").select("job_id").limit(1)).data!.length).toBe(1);
-    for (const t of ["accounts_receivable", "ar_payments", "payment_transactions", "overhead_costs", "investor_transactions"] as const) {
+    for (const t of [
+      "accounts_receivable",
+      "ar_payments",
+      "payment_transactions",
+      "overhead_costs",
+      "investor_transactions",
+    ] as const) {
       expect((await ops.from(t).select("*").limit(5)).data ?? [], t).toEqual([]);
     }
     for (const call of reports(ops)) expect((await call).error?.message).toMatch(/Not authorized/);
@@ -98,7 +104,9 @@ describe.skipIf(!enabled)("role access", () => {
     const ap = await ops.from("accounts_payable").select("id").eq("is_void", false).limit(1);
     const id = ap.data?.[0]?.id;
     if (!id) return;
-    expect((await ops.rpc("record_ap_payment", { _ap_id: id, _payment_date: today, _amount: 1 })).error).not.toBeNull();
+    expect(
+      (await ops.rpc("record_ap_payment", { _ap_id: id, _payment_date: today, _amount: 1 })).error,
+    ).not.toBeNull();
     expect((await ops.rpc("void_ap", { _id: id, _reason: "TEST" })).error).not.toBeNull();
     const upd = await ops.from("accounts_payable").update({ paid_amount: 1 }).eq("id", id).select();
     expect(upd.data ?? []).toEqual([]);

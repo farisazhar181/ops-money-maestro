@@ -271,11 +271,7 @@ function ReportsPage() {
           <ReportCard
             title="Financial Ratios · to date"
             onExport={() =>
-              downloadCsv(
-                "financial-ratios.csv",
-                ["Ratio", "Value", "Formula", "Inputs"],
-                ratios,
-              )
+              downloadCsv("financial-ratios.csv", ["Ratio", "Value", "Formula", "Inputs"], ratios)
             }
           >
             <Table>
@@ -520,7 +516,9 @@ function StatementTable({
   rows: { label: string; values: number[]; bold?: boolean; section?: boolean }[];
 }) {
   if (months.length === 0)
-    return <p className="py-10 text-center text-sm text-muted-foreground">No records to display.</p>;
+    return (
+      <p className="py-10 text-center text-sm text-muted-foreground">No records to display.</p>
+    );
   return (
     <Table>
       <TableHeader>

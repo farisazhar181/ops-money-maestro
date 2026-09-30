@@ -321,10 +321,7 @@ function OverheadPage() {
             </div>
             <div className="space-y-2">
               <Label>Amount (IDR)</Label>
-              <MoneyInput
-                value={form.amount}
-                onChange={(v) => setForm({ ...form, amount: v })}
-              />
+              <MoneyInput value={form.amount} onChange={(v) => setForm({ ...form, amount: v })} />
             </div>
             <div className="space-y-2">
               <Label>Note</Label>
