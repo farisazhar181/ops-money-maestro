@@ -65,6 +65,11 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-invoice-paper: var(--invoice-paper);
+  --color-invoice-ink: var(--invoice-ink);
+  --color-invoice-muted: var(--invoice-muted);
+  --color-invoice-rule: var(--invoice-rule);
+  --color-invoice-paid: var(--invoice-paid);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
@@ -109,6 +114,11 @@
   --sidebar-accent-foreground: oklch(0.97 0.01 250);
   --sidebar-border: oklch(0.34 0.045 258);
   --sidebar-ring: oklch(0.72 0.13 190);
+  --invoice-paper: oklch(1 0 0);
+  --invoice-ink: oklch(0.2 0.01 260);
+  --invoice-muted: oklch(0.48 0.01 260);
+  --invoice-rule: oklch(0.82 0.01 260);
+  --invoice-paid: oklch(0.5 0.14 155);
 }
 
 .dark {
@@ -150,6 +160,76 @@
   --warning-foreground: oklch(0.18 0.03 250);
   --info: oklch(0.68 0.12 245);
   --info-foreground: oklch(0.18 0.03 250);
+  --invoice-paper: oklch(1 0 0);
+  --invoice-ink: oklch(0.2 0.01 260);
+  --invoice-muted: oklch(0.48 0.01 260);
+  --invoice-rule: oklch(0.82 0.01 260);
+  --invoice-paid: oklch(0.5 0.14 155);
+}
+
+@layer components {
+  .invoice-print-page {
+    min-height: 100vh;
+    background: var(--color-muted);
+  }
+
+  .invoice-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 18mm;
+  }
+
+  .invoice-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-invoice-muted);
+  }
+
+  .invoice-watermark {
+    position: absolute;
+    inset: 38% auto auto 12%;
+    transform: rotate(-32deg);
+    color: color-mix(in oklch, var(--color-destructive) 16%, transparent);
+    font-size: 8rem;
+    font-weight: 800;
+    line-height: 1;
+    pointer-events: none;
+  }
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  [data-sidebar="sidebar"],
+  [data-sidebar="trigger"],
+  body > div > div > div > header,
+  .no-print {
+    display: none !important;
+  }
+
+  body,
+  .invoice-print-page {
+    background: var(--color-invoice-paper) !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .invoice-print-page {
+    margin: 0 !important;
+    min-height: auto;
+  }
+
+  .invoice-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    box-shadow: none;
+  }
 }
 
 @layer base {

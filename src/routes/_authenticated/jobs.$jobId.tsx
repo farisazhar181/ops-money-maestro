@@ -3,7 +3,7 @@ import { MoneyInput } from "@/components/money-input";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, Banknote, Download, FileText, Pencil, Plus } from "lucide-react";
+import { Ban, Banknote, Download, FileText, Pencil, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -120,6 +120,9 @@ function JobDetail() {
     volume_weight: "",
     origin: "",
     destination: "",
+    commodity: "",
+    etd: "",
+    eta: "",
   });
   const [closing, setClosing] = useState({
     actual_selling: "",
@@ -212,6 +215,9 @@ function JobDetail() {
       volume_weight: job.volume_weight ?? "",
       origin: job.origin ?? "",
       destination: job.destination ?? "",
+      commodity: job.commodity ?? "",
+      etd: job.etd ?? "",
+      eta: job.eta ?? "",
     });
     setClosing({
       actual_selling: financials?.actual_selling == null ? "" : String(financials.actual_selling),
@@ -293,6 +299,9 @@ function JobDetail() {
         _volume_weight: edit.volume_weight,
         _origin: edit.origin,
         _destination: edit.destination,
+        _commodity: edit.commodity,
+        _etd: edit.etd || (null as unknown as string),
+        _eta: edit.eta || (null as unknown as string),
       });
       if (error) throw error;
     },
@@ -731,6 +740,17 @@ function JobDetail() {
                       )}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
+                      {canEditFinance && (
+                        <Button size="icon" variant="ghost" title="Print invoice" asChild>
+                          <Link
+                            to="/invoices/$invoiceId/print"
+                            params={{ invoiceId: invoice.id }}
+                            target="_blank"
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
                       {canEditFinance && !invoice.is_void && (
                         <>
                           <Button
@@ -872,6 +892,23 @@ function JobDetail() {
               label="Destination"
               value={edit.destination}
               onChange={(value) => setEdit({ ...edit, destination: value })}
+            />
+            <Field
+              label="Commodity / cargo description"
+              value={edit.commodity}
+              onChange={(value) => setEdit({ ...edit, commodity: value })}
+            />
+            <Field
+              label="ETD (est. departure)"
+              type="date"
+              value={edit.etd}
+              onChange={(value) => setEdit({ ...edit, etd: value })}
+            />
+            <Field
+              label="ETA (est. arrival)"
+              type="date"
+              value={edit.eta}
+              onChange={(value) => setEdit({ ...edit, eta: value })}
             />
           </div>
           <DialogFooter>
