@@ -14,3 +14,4 @@
 - Tests: `bunx vitest run`; database tests need TEST_OWNER_TOKEN, TEST_FINANCE_EMAIL, TEST_OPS_EMAIL, TEST_PASSWORD and otherwise skip.
 
 - Clients never INSERT/UPDATE business tables directly; every write goes through a `public.*` wrapper calling a `private.*_impl` function. Why: validation and activity logging can't be bypassed.
+- Printable invoices use the authenticated `/invoices/$invoiceId/print` route and browser printing; no generated PDF library. Why: keeps Finance/Management access checks and A4 output in the app.

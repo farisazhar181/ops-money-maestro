@@ -166,7 +166,13 @@ function PrintableInvoicePage() {
   );
 }
 
-function InvoiceDetail({ label, value }: { label: string; value: string | null | undefined }) {
+function InvoiceDetail({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}) {
   return (
     <div>
       <p className="text-xs text-invoice-muted">{label}</p>

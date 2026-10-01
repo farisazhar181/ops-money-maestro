@@ -174,7 +174,7 @@
   }
 
   .invoice-sheet {
-    width: 210mm;
+    width: min(210mm, 100%);
     min-height: 297mm;
     padding: 18mm;
   }
