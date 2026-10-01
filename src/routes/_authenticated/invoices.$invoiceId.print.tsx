@@ -175,7 +175,6 @@ function InvoiceDetail({ label, value }: { label: string; value: string | null |
   );
 }
 
-
 function InvoiceAmount({
   label,
   value,
