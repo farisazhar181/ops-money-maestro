@@ -64,8 +64,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        {!collapsed && (
+      {!collapsed && (
+        <SidebarHeader className="border-b border-sidebar-border">
           <div className="flex h-16 items-center px-2 py-2">
             <img
               src={logoAsset.url}
@@ -73,8 +73,8 @@ export function AppSidebar() {
               className="h-auto max-h-11 w-full object-contain"
             />
           </div>
-        )}
-      </SidebarHeader>
+        </SidebarHeader>
+      )}
 
       <SidebarContent>
         <SidebarGroup>
