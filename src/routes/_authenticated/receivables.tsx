@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { MoneyInput } from "@/components/money-input";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, Banknote, Pencil } from "lucide-react";
+import { Ban, Banknote, Pencil, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -178,6 +178,17 @@ function ReceivablesPage() {
                       <StatusBadge status={r.is_void ? "Voided" : late ? "Overdue" : r.status} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right">
+                      {canEditFinance && (
+                        <Button size="icon" variant="ghost" title="Print invoice" asChild>
+                          <Link
+                            to="/invoices/$invoiceId/print"
+                            params={{ invoiceId: r.id }}
+                            target="_blank"
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
                       {canEditFinance && !r.is_void && (
                         <>
                           <Button

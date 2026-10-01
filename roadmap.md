@@ -27,3 +27,8 @@
 - [x] Job history shows before/after (role-limited)
 - [x] Close financials dialog uses Pipeline/Active/Closed
 - [x] Tests (18 pass), build OK, lint: formatting-only issues
+
+## Invoice and job details (Oct 1)
+- [x] Use the LOGIS logo in the sidebar, sign-in page, and favicon
+- [x] Allow Commodity, ETD, and ETA updates through the validated job function and edit dialog
+- [x] Add Finance/Management-only A4 browser-print customer invoices

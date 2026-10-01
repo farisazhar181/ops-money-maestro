@@ -8,7 +8,6 @@ import {
   ChartNoAxesCombined,
   Database,
   Settings,
-  Ship,
   Coins,
   Landmark,
   LineChart as LineChartIcon,
@@ -26,6 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRoles } from "@/hooks/use-auth";
+import logoAsset from "@/assets/logo-logis.jpg.asset.json";
 
 const nav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exec: true },
@@ -64,21 +64,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Ship className="h-5 w-5" />
+      {!collapsed && (
+        <SidebarHeader className="border-b border-sidebar-border">
+          <div className="flex h-16 items-center px-2 py-2">
+            <img
+              src={logoAsset.url}
+              alt="LOGIS"
+              className="h-auto max-h-11 w-full object-contain"
+            />
           </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="truncate font-display text-sm font-semibold text-sidebar-foreground">
-                Loka Logistics
-              </p>
-              <p className="truncate text-xs text-sidebar-foreground/60">Financial Operations</p>
-            </div>
-          )}
-        </div>
-      </SidebarHeader>
+        </SidebarHeader>
+      )}
 
       <SidebarContent>
         <SidebarGroup>

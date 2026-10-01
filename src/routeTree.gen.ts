@@ -24,6 +24,7 @@ import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedStatisticsRouteImport } from './routes/_authenticated/statistics'
 import { Route as AuthenticatedJobsJobIdRouteImport } from './routes/_authenticated/jobs.$jobId'
+import { Route as AuthenticatedInvoicesInvoiceIdPrintRouteImport } from './routes/_authenticated/invoices.$invoiceId.print'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +101,12 @@ const AuthenticatedJobsJobIdRoute = AuthenticatedJobsJobIdRouteImport.update({
   path: '/$jobId',
   getParentRoute: () => AuthenticatedJobsRoute,
 } as any)
+const AuthenticatedInvoicesInvoiceIdPrintRoute =
+  AuthenticatedInvoicesInvoiceIdPrintRouteImport.update({
+    id: '/invoices/$invoiceId/print',
+    path: '/invoices/$invoiceId/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
+  '/invoices/$invoiceId/print': typeof AuthenticatedInvoicesInvoiceIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/statistics': typeof AuthenticatedStatisticsRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
+  '/invoices/$invoiceId/print': typeof AuthenticatedInvoicesInvoiceIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/statistics': typeof AuthenticatedStatisticsRoute
   '/_authenticated/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
+  '/_authenticated/invoices/$invoiceId/print': typeof AuthenticatedInvoicesInvoiceIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/jobs/$jobId'
+    | '/invoices/$invoiceId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistics'
     | '/jobs/$jobId'
+    | '/invoices/$invoiceId/print'
   id:
     | '__root__'
     | '/'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/statistics'
     | '/_authenticated/jobs/$jobId'
+    | '/_authenticated/invoices/$invoiceId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJobsJobIdRouteImport
       parentRoute: typeof AuthenticatedJobsRoute
     }
+    '/_authenticated/invoices/$invoiceId/print': {
+      id: '/_authenticated/invoices/$invoiceId/print'
+      path: '/invoices/$invoiceId/print'
+      fullPath: '/invoices/$invoiceId/print'
+      preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -342,6 +362,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStatisticsRoute: typeof AuthenticatedStatisticsRoute
+  AuthenticatedInvoicesInvoiceIdPrintRoute: typeof AuthenticatedInvoicesInvoiceIdPrintRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -356,6 +377,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStatisticsRoute: AuthenticatedStatisticsRoute,
+  AuthenticatedInvoicesInvoiceIdPrintRoute:
+    AuthenticatedInvoicesInvoiceIdPrintRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Ship, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import logoAsset from "@/assets/logo-logis.jpg.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -76,12 +77,7 @@ function AuthPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <section className="hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Ship className="h-5 w-5" />
-          </div>
-          <span className="font-display text-lg font-semibold">PT. Loka Logistics Solution</span>
-        </div>
+        <img src={logoAsset.url} alt="LOGIS" className="h-auto w-56 bg-card object-contain" />
         <div className="max-w-md space-y-4">
           <h1 className="font-display text-4xl font-semibold leading-tight">
             Financial operations, from job sheet to cash flow.
@@ -97,6 +93,7 @@ function AuthPage() {
       <section className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md">
           <CardHeader>
+            <img src={logoAsset.url} alt="LOGIS" className="mb-4 h-auto w-48 object-contain" />
             <CardTitle className="font-display text-2xl">Welcome back</CardTitle>
             <CardDescription>Sign in with your company email to continue.</CardDescription>
           </CardHeader>

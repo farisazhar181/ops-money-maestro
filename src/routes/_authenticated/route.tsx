@@ -67,7 +67,7 @@ function AuthenticatedLayout() {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b bg-card/80 px-4 backdrop-blur">
+          <header className="no-print sticky top-0 z-10 flex h-14 items-center justify-between gap-2 border-b bg-card/80 px-4 backdrop-blur">
             <SidebarTrigger />
             <div className="flex items-center gap-3">
               {primaryRole && (
