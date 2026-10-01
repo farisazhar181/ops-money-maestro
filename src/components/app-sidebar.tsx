@@ -25,7 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRoles } from "@/hooks/use-auth";
-import logoAsset from "@/assets/logo-logis.jpg.asset.json";
+import logoWhite from "@/assets/logo-logis-white.png";
 
 const nav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exec: true },
@@ -67,11 +67,7 @@ export function AppSidebar() {
       {!collapsed && (
         <SidebarHeader className="border-b border-sidebar-border">
           <div className="flex h-16 items-center px-2 py-2">
-            <img
-              src={logoAsset.url}
-              alt="LOGIS"
-              className="h-auto max-h-11 w-full object-contain"
-            />
+            <img src={logoWhite} alt="LOGIS" className="h-auto max-h-11 w-full object-contain" />
           </div>
         </SidebarHeader>
       )}

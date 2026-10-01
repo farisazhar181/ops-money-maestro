@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import logoAsset from "@/assets/logo-logis.jpg.asset.json";
+import logoBlack from "@/assets/logo-logis-black.png";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -77,7 +77,11 @@ function AuthPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <section className="hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <img src={logoAsset.url} alt="LOGIS" className="h-auto w-56 bg-card object-contain" />
+        <img
+          src={logoBlack}
+          alt="LOGIS"
+          className="h-auto w-56 rounded-lg bg-card px-4 py-2 object-contain"
+        />
         <div className="max-w-md space-y-4">
           <h1 className="font-display text-4xl font-semibold leading-tight">
             Financial operations, from job sheet to cash flow.
@@ -93,7 +97,7 @@ function AuthPage() {
       <section className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <img src={logoAsset.url} alt="LOGIS" className="mb-4 h-auto w-48 object-contain" />
+            <img src={logoBlack} alt="LOGIS" className="mb-4 h-auto w-48 object-contain" />
             <CardTitle className="font-display text-2xl">Welcome back</CardTitle>
             <CardDescription>Sign in with your company email to continue.</CardDescription>
           </CardHeader>
