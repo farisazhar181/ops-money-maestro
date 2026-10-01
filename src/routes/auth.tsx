@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import logoBlack from "@/assets/logo-logis-black.png";
+import logoWhite from "@/assets/logo-logis-white.png";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -77,21 +78,19 @@ function AuthPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <section className="hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
-        <img
-          src={logoBlack}
-          alt="LOGIS"
-          className="h-auto w-56 rounded-lg bg-card px-4 py-2 object-contain"
-        />
+        <img src={logoWhite} alt="LOGIS" className="h-auto w-56 object-contain" />
         <div className="max-w-md space-y-4">
           <h1 className="font-display text-4xl font-semibold leading-tight">
-            Financial operations, from job sheet to cash flow.
+            Every shipment, from job sheet to payment.
           </h1>
           <p className="text-sidebar-foreground/70">
-            Track shipments, vendor costs, customer invoices and profitability in one role-based
-            workspace.
+            Operations, Finance and Management work from the same records: job sheets, vendor bills,
+            invoices and cash, each visible to the right people.
           </p>
         </div>
-        <p className="text-xs text-sidebar-foreground/50">ERP-Lite &middot; Internal use only</p>
+        <p className="text-xs text-sidebar-foreground/50">
+          PT. Loka Logistics Solution &middot; Internal use only
+        </p>
       </section>
 
       <section className="flex items-center justify-center p-6">
